@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Space Invader 3D</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: #010005;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Effet Scanline Rétro */
+        body::after {
+            content: " ";
+            display: block;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: repeating-linear-gradient(0deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 1px, transparent 1px, transparent 3px);
+            pointer-events: none;
+            z-index: 9999;
+            opacity: 0.4;
+        }
+
+        #game-canvas {
+            display: block;
+        }
+        .hud {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-shadow: 0 0 10px #00ffff, 0 0 20px #00ffff;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .hud.visible {
+            opacity: 1;
+        }
+        .lives-container {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .life-icon {
+            width: 30px;
+            height: 15px;
+        }
+        .overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            background-color: rgba(1, 0, 5, 0.7);
+            text-align: center;
+            backdrop-filter: blur(10px);
+            transition: opacity 0.5s ease;
+            z-index: 10;
+        }
+        .overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        
+        .overlay h1 {
+            color: #ff00ff;
+            text-shadow: 0 0 15px #ff00ff, 0 0 30px #ff00ff;
+            font-weight: 700;
+        }
+
+        .overlay h1.glitch {
+            position: relative;
+            font-size: 5.5rem;
+            margin-bottom: 1rem;
+            animation: pulse 2s infinite, noise 3s linear infinite;
+        }
+
+        .overlay h1.glitch::before,
+        .overlay h1.glitch::after {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(1, 0, 5, 0.7);
+            overflow: hidden;
+        }
+
+        .overlay h1.glitch::before {
+            left: 3px;
+            text-shadow: -2px 0 #ff00ff;
+            clip-path: inset(50% 0 51% 0);
+            animation: glitch-anim-1 2s infinite linear alternate-reverse;
+        }
+
+        .overlay h1.glitch::after {
+            left: -3px;
+            text-shadow: -2px 0 #00ffff, 2px 2px #ff00ff;
+            clip-path: inset(49% 0 50% 0);
+            animation: glitch-anim-2 3s infinite linear alternate-reverse;
+        }
+        
+        .instructions {
+            margin-top: 2rem;
+            margin-bottom: 3rem;
+            color: #00ffff;
+            text-transform: uppercase;
+        }
+
+        .instructions p {
+            font-size: 1.2rem;
+            letter-spacing: 2px;
+            margin-bottom: 1.5rem;
+            text-shadow: 0 0 5px #00ffff;
+        }
+
+        .controls-grid {
+            display: flex;
+            gap: 3rem;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .control-item span {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            letter-spacing: 1px;
+        }
+
+        .key-icon {
+            background: rgba(0, 255, 255, 0.1);
+            border: 1px solid #00ffff;
+            border-radius: 8px;
+            padding: 10px 18px;
+            box-shadow: 0 0 8px -2px #00ffff inset, 0 0 10px #00ffff;
+            font-size: 1.2rem;
+            margin: 0 5px;
+            display: inline-block;
+            color: #fff;
+            text-shadow: 0 0 5px #fff;
+        }
+
+        .spacebar {
+            width: 180px;
+            text-align: center;
+        }
+
+        .overlay button {
+            font-family: 'Orbitron', sans-serif;
+            background: linear-gradient(45deg, #ff00ff, #00ffff);
+            border: none;
+            padding: 15px 30px;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            cursor: pointer;
+            box-shadow: 0 0 10px #ff00ff, 0 0 20px #00ffff;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        .overlay button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px #ff00ff, 0 0 40px #00ffff;
+        }
+
+        .overlay button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+            transition: left 0.6s ease;
+            z-index: -1;
+        }
+
+        .overlay button:hover::before {
+            left: 100%;
+        }
+
+        #wave-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 5rem;
+            color: #fff;
+            text-shadow: 0 0 20px #ff00ff;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        #touch-controls {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 25%;
+            display: none;
+            -webkit-tap-highlight-color: transparent;
+            z-index: 5;
+        }
+        #touch-left, #touch-right, #touch-shoot {
+            position: absolute;
+            top:0; bottom: 0;
+        }
+        #touch-left { left: 0; width: 40%; }
+        #touch-right { right: 0; width: 40%; }
+        #touch-shoot { left: 40%; width: 20%;}
+
+        @keyframes pulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.8; transform: scale(1.02); } }
+        @keyframes noise {
+          0%, 3%, 5%, 42%, 44%, 100% {opacity: 1; transform: scale(1);}
+          4.5% {transform: translate(5px, 5px) scale(1.02);}
+          43.5% {transform: translate(-5px, -5px) scale(1.02);}
+        }
+        @keyframes glitch-anim-1 {
+            0% { clip-path: inset(40% 0 61% 0); } 20% { clip-path: inset(20% 0 21% 0); } 40% { clip-path: inset(80% 0 2% 0); }
+            60% { clip-path: inset(50% 0 51% 0); } 80% { clip-path: inset(10% 0 81% 0); } 100% { clip-path: inset(70% 0 1% 0); }
+        }
+        @keyframes glitch-anim-2 {
+            0% { clip-path: inset(2% 0 95% 0); } 20% { clip-path: inset(98% 0 1% 0); } 40% { clip-path: inset(33% 0 34% 0); }
+            60% { clip-path: inset(90% 0 3% 0); } 80% { clip-path: inset(40% 0 41% 0); } 100% { clip-path: inset(20% 0 71% 0); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hud" class="hud">
+        <div id="score">SCORE: 0</div>
+        <div id="wave-counter">VAGUE: 1</div>
+        <div class="lives-container" id="lives"></div>
+    </div>
+    
+    <div id="wave-message"></div>
+
+    <div id="start-screen" class="overlay">
+        <h1 class="glitch" data-text="Space Invader 3D">Space Invader 3D</h1>
+        <div class="instructions">
+            <p>CONTRÔLES</p>
+            <div class="controls-grid">
+                <div class="control-item">
+                    <div>
+                        <span class="key-icon">&larr;</span><span class="key-icon">&rarr;</span>
+                    </div>
+                    <span>DÉPLACER</span>
+                </div>
+                <div class="control-item">
+                    <div><span class="key-icon spacebar">ESPACE</span></div>
+                    <span>TIRER</span>
+                </div>
+            </div>
+        </div>
+        <button id="start-button">LANCER MISSION</button>
+    </div>
+
+    <div id="game-over-screen" class="overlay hidden">
+        <h1>MISSION ÉCHOUÉE</h1>
+        <p id="final-score">SCORE FINAL : 0</p>
+        <button id="restart-button">NOUVEL ESSAI</button>
+    </div>
+    
+    <div id="touch-controls">
+        <div id="touch-left"></div>
+        <div id="touch-shoot"></div>
+        <div id="touch-right"></div>
+    </div>
+
+    <canvas id="game-canvas"></canvas>
+
+    <script async src="https://unpkg.com/es-module-shims@1.6.3/dist/es-module-shims.js"></script>
+    <script type="importmap">
+    { "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.157.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.157.0/examples/jsm/"
+    } }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+
+    <script type="module">
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+
+        const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+        if(isMobile) document.getElementById('touch-controls').style.display = 'block';
+
+        let scene, camera, renderer, composer, clock;
+        let player, starField;
+        const keys = {};
+        const playerBullets = [], alienBullets = [], particles = [], powerUps = [];
+        let aliens = [];
+        let barriers = [];
+        let score = 0, lives = 3, wave = 1;
+        let gameRunning = false;
+        let alienDirection = 1, alienMoveStep = 0.5, alienDropDistance = 0.5;
+        let lastAlienMoveTime = 0, moveInterval = 700;
+        let powerUpActive = false, powerUpTimeout;
+
+        const hud = document.getElementById('hud');
+        const hudScore = document.getElementById('score');
+        const hudLives = document.getElementById('lives');
+        const hudWave = document.getElementById('wave-counter');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        
+        // --- Enhanced Audio ---
+        const music = new Tone.Loop(time => {
+            const notes = ["C2", "G2", "Eb2", "Bb2"];
+            const synth = new Tone.MembraneSynth().toDestination();
+            synth.triggerAttackRelease(notes[Math.floor(Math.random() * notes.length)], "8n", time);
+        }, "4n").start(0);
+        music.humanize = true;
+
+        const laserSynth = new Tone.PolySynth(Tone.Synth, {
+            oscillator: { type: "fatsawtooth", count: 3, spread: 30 },
+            envelope: { attack: 0.01, decay: 0.1, sustain: 0.2, release: 0.2 },
+        }).toDestination();
+        const explosionSynth = () => new Tone.NoiseSynth({ noise: { type: "pink" }, envelope: { attack: 0.01, decay: 0.3, sustain: 0 } }).toDestination().triggerAttackRelease("0.3");
+        const moveSynths = [
+            new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).toDestination(),
+            new Tone.Synth({ oscillator: { type: "square" }, envelope: { attack: 0.01, decay: 0.1, sustain: 0.1, release: 0.1 } }).toDestination()
+        ];
+        const powerupSound = () => new Tone.FatOscillator("A4", "sawtooth", 40).toDestination().start().stop("+0.2");
+
+        function init() {
+            clock = new THREE.Clock();
+            scene = new THREE.Scene();
+            scene.fog = new THREE.FogExp2(0x010005, 0.03);
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 5, 20);
+            camera.lookAt(0, 0, 0);
+
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setPixelRatio(window.devicePixelRatio);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+
+            const ambientLight = new THREE.AmbientLight(0x404040, 3);
+            scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 2);
+            directionalLight.position.set(5, 10, 7.5);
+            scene.add(directionalLight);
+
+            const renderScene = new RenderPass(scene, camera);
+            const bloomPass = new UnrealBloomPass(new THREE.Vector2(window.innerWidth, window.innerHeight), 1.2, 0.6, 0.8);
+            composer = new EffectComposer(renderer);
+            composer.addPass(renderScene);
+            composer.addPass(bloomPass);
+            
+            createStarfield();
+            createPlayer();
+            setupEventListeners();
+            animate();
+        }
+
+        function startGame() {
+            Tone.start().then(() => {
+                Tone.Transport.start();
+                resetGame();
+                gameRunning = true;
+                startScreen.classList.add('hidden');
+                gameOverScreen.classList.add('hidden');
+                hud.classList.add('visible');
+                displayWaveMessage(`VAGUE ${wave}`);
+            });
+        }
+
+        function resetGame() {
+            [...playerBullets, ...alienBullets, ...powerUps].forEach(b => scene.remove(b));
+            aliens.forEach(a => scene.remove(a.mesh));
+            barriers.forEach(b => b.cubes.forEach(c => scene.remove(c)));
+            playerBullets.length = 0; alienBullets.length = 0; aliens.length = 0; barriers.length = 0; powerUps.length = 0;
+            score = 0; lives = 3; wave = 1; moveInterval = 700; alienDirection = 1;
+            updateHUD();
+            createEnergyShields();
+            spawnWave();
+            player.position.set(0, 0, 15);
+            player.visible = true;
+        }
+
+        function gameOver() {
+            gameRunning = false;
+            player.visible = false;
+            Tone.Transport.stop();
+            document.getElementById('final-score').textContent = `SCORE FINAL : ${score}`;
+            gameOverScreen.classList.remove('hidden');
+            hud.classList.remove('visible');
+        }
+
+        function nextWave() {
+            wave++;
+            moveInterval = Math.max(200, 700 - wave * 25);
+            updateHUD();
+            displayWaveMessage(wave % 5 === 0 ? "VAGUE BOSS" : `VAGUE ${wave}`);
+            setTimeout(spawnWave, 2000);
+        }
+        
+        function spawnWave() {
+             createAliens(wave);
+             if (Math.random() < 0.3 + wave * 0.05) spawnPowerUpAlien();
+        }
+
+        function updateHUD() {
+            hudScore.textContent = `SCORE: ${score}`;
+            hudWave.textContent = `VAGUE: ${wave}`;
+            hudLives.innerHTML = '';
+            const playerSVG = `<svg class="life-icon" viewBox="0 0 40 20" xmlns="http://www.w3.org/2000/svg"><path d="M20 0 L25 10 L40 10 L30 20 L20 15 L10 20 L0 10 L15 10 Z" fill="#00ffff"/></svg>`;
+            for (let i = 0; i < lives; i++) {
+                hudLives.innerHTML += playerSVG;
+            }
+        }
+
+        function displayWaveMessage(text) {
+            const msg = document.getElementById('wave-message');
+            msg.textContent = text;
+            msg.style.opacity = '1';
+            setTimeout(() => { msg.style.opacity = '0'; }, 1500);
+        }
+
+        // --- Create Functions ---
+        function createPlayer() {
+            player = new THREE.Group();
+            const bodyMat = new THREE.MeshStandardMaterial({ color: 0xeeeeff, metalness: 0.9, roughness: 0.1 });
+            const emissiveMat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 2 });
+            const body = new THREE.Mesh(new THREE.ConeGeometry(1, 2, 4), bodyMat);
+            body.rotation.y = Math.PI / 4;
+            const wing1 = new THREE.Mesh(new THREE.BoxGeometry(3, 0.2, 1), bodyMat);
+            wing1.position.y = -0.5;
+            const wing2 = new THREE.Mesh(new THREE.BoxGeometry(0.2, 0.4, 2.5), bodyMat);
+            wing2.position.y = -0.5;
+            const cockpit = new THREE.Mesh(new THREE.SphereGeometry(0.4, 8, 8), emissiveMat);
+            cockpit.position.y = 0.2;
+            player.add(body, wing1, wing2, cockpit);
+            player.position.set(0, 0, 15);
+            scene.add(player);
+        }
+        
+        function createAliens(waveNum) {
+            const isBossWave = waveNum % 5 === 0;
+            if(isBossWave) {
+                const bossGeom = new THREE.TorusKnotGeometry(2, 0.5, 100, 16);
+                const originalColor = new THREE.Color(0xff00ff);
+                const bossMat = new THREE.MeshStandardMaterial({ color: originalColor, emissive: originalColor, metalness: 0.8, roughness: 0.2 });
+                const mesh = new THREE.Mesh(bossGeom, bossMat);
+                mesh.userData.originalColor = originalColor;
+                mesh.position.set(0, 8, 0);
+                aliens.push({ mesh, points: 500, health: 15 + waveNum * 2, isBoss: true });
+                scene.add(mesh);
+                return;
+            }
+            const rows = 5, cols = 10;
+            for (let r = 0; r < rows; r++) {
+                for (let c = 0; c < cols; c++) {
+                    const type = Math.floor(r / 2);
+                    const geom = [new THREE.OctahedronGeometry(0.7), new THREE.TorusGeometry(0.5, 0.2, 8, 16), new THREE.ConeGeometry(0.5, 1, 8)][type];
+                    const originalColor = new THREE.Color([0x00ff00, 0xffff00, 0xffaa00][type]);
+                    const mat = new THREE.MeshStandardMaterial({ color: originalColor, emissive: originalColor });
+                    const mesh = new THREE.Mesh(geom, mat);
+                    mesh.userData.originalColor = originalColor;
+                    mesh.position.set(-11 + c * 2.2, 10 - r * 1.8, 0);
+                    aliens.push({ mesh, points: (type+1)*10, health: 1, isBoss: false });
+                    scene.add(mesh);
+                }
+            }
+        }
+        
+        function spawnPowerUpAlien() {
+            const geom = new THREE.IcosahedronGeometry(0.8);
+            const mat = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff });
+            const mesh = new THREE.Mesh(geom, mat);
+            mesh.userData.originalColor = new THREE.Color(0x00ffff);
+            mesh.position.set(Math.random() > 0.5 ? -18 : 18, 12, 0);
+            const pa = { mesh, points: 100, health: 1, isPowerUp: true, speed: 0.1 };
+            pa.direction = pa.mesh.position.x > 0 ? -1 : 1;
+            aliens.push(pa);
+            scene.add(mesh);
+        }
+
+        function createEnergyShields() {
+            for (let i = 0; i < 4; i++) {
+                const barrier = { cubes: [] };
+                for(let j=0; j<18; j++) {
+                    const cube = new THREE.Mesh(
+                        new THREE.BoxGeometry(0.5, 0.5, 0.5),
+                        new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, transparent: true, opacity: 0.7 })
+                    );
+                    cube.position.set(-9 + i * 6 + (j%6-2.5)*0.5, 3 - Math.floor(j/6)*0.5, 12);
+                    cube.userData.health = 3; // Shields have health
+                    scene.add(cube);
+                    barrier.cubes.push(cube);
+                }
+                barriers.push(barrier);
+            }
+        }
+        
+        function createParticleExplosion(position, color, count) {
+            for(let i=0; i<count; i++) {
+                particles.push({
+                    position: position.clone(),
+                    velocity: new THREE.Vector3((Math.random()-0.5), (Math.random()-0.5), (Math.random()-0.5)).normalize().multiplyScalar(Math.random()*0.3),
+                    color: new THREE.Color(color),
+                    alpha: 1,
+                    size: Math.random() * 0.2 + 0.1,
+                    life: Math.random() * 0.5 + 0.5
+                });
+            }
+        }
+
+        // --- Event Listeners & Controls ---
+        function setupEventListeners() {
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                composer.setSize(window.innerWidth, window.innerHeight);
+            });
+            document.addEventListener('keydown', e => keys[e.code] = true);
+            document.addEventListener('keyup', e => {
+                keys[e.code] = false;
+                if (gameRunning && e.code === 'Space' && !keys['Space']) createPlayerBullet();
+            });
+            document.getElementById('start-button').addEventListener('click', startGame);
+            document.getElementById('restart-button').addEventListener('click', startGame);
+
+            if(isMobile) {
+                const tc = document.getElementById('touch-controls');
+                tc.addEventListener('touchstart', e => e.preventDefault(), { passive: false });
+                document.getElementById('touch-left').addEventListener('touchstart', () => keys['ArrowLeft'] = true);
+                document.getElementById('touch-left').addEventListener('touchend', () => keys['ArrowLeft'] = false);
+                document.getElementById('touch-right').addEventListener('touchstart', () => keys['ArrowRight'] = true);
+                document.getElementById('touch-right').addEventListener('touchend', () => keys['ArrowRight'] = false);
+                document.getElementById('touch-shoot').addEventListener('touchstart', createPlayerBullet);
+            }
+        }
+
+        // --- Game Loop & Updates ---
+        function animate() {
+            const delta = clock.getDelta();
+            requestAnimationFrame(animate);
+
+            if (gameRunning) {
+                const time = clock.getElapsedTime() * 1000;
+                movePlayer(delta);
+                moveAliens(time, delta);
+                updateBullets(delta);
+                updateParticles(delta);
+                updatePowerUps(delta);
+                alienShoot();
+                checkCollisions();
+            }
+            
+            starField.rotation.y += 0.0001;
+            aliens.forEach(a => a.mesh.rotation.y += a.isBoss ? 0.005 : 0.01);
+            composer.render(delta);
+        }
+        
+        function movePlayer(delta) {
+            const speed = 20 * delta;
+            if (keys['ArrowLeft'] && player.position.x > -18) player.position.x -= speed;
+            if (keys['ArrowRight'] && player.position.x < 18) player.position.x += speed;
+        }
+
+        function moveAliens(time, delta) {
+            aliens.forEach(alien => {
+                if (alien.isPowerUp) {
+                    alien.mesh.position.x += alien.speed * alien.direction;
+                    if(Math.abs(alien.mesh.position.x) > 20) alien.health = 0; // Mark for removal
+                }
+            });
+            if (time - lastAlienMoveTime > moveInterval) {
+                let hitEdge = false;
+                aliens.filter(a => !a.isPowerUp).forEach(alien => {
+                    alien.mesh.position.x += alienDirection * (alien.isBoss ? alienMoveStep*0.5 : alienMoveStep);
+                    if (Math.abs(alien.mesh.position.x) > 18) hitEdge = true;
+                });
+                if (hitEdge) {
+                    alienDirection *= -1;
+                    aliens.filter(a => !a.isPowerUp).forEach(alien => {
+                        alien.mesh.position.z += alienDropDistance;
+                        if (alien.mesh.position.z >= player.position.z - 2) gameOver();
+                    });
+                }
+                lastAlienMoveTime = time;
+                if (aliens.length > 0) {
+                   moveSynths[0].triggerAttackRelease(aliens.length % 2 === 0 ? "C2" : "C#2", "8n");
+                }
+            }
+        }
+        
+        function createPlayerBullet() {
+            const fireRate = powerUpActive ? 100 : 250;
+            if(Date.now() - (player.lastShotTime || 0) < fireRate) return;
+            player.lastShotTime = Date.now();
+            
+            const bulletGeom = new THREE.CylinderGeometry(0.1, 0.1, 1.5);
+            const bulletMat = new THREE.MeshStandardMaterial({color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 3});
+            const bullet = new THREE.Mesh(bulletGeom, bulletMat);
+            bullet.position.copy(player.position);
+            bullet.rotation.x = Math.PI / 2;
+            playerBullets.push(bullet);
+            scene.add(bullet);
+            laserSynth.triggerAttackRelease("G5", "32n");
+        }
+        
+        function alienShoot() {
+            const chance = 0.01 + wave * 0.002;
+            if (aliens.length > 0 && Math.random() < chance) {
+                const shootingAliens = aliens.filter(a => !a.isPowerUp);
+                if(shootingAliens.length === 0) return;
+                const randomAlien = shootingAliens[Math.floor(Math.random() * shootingAliens.length)];
+                
+                const bulletGeom = new THREE.SphereGeometry(0.2, 8, 8);
+                const bulletMat = new THREE.MeshStandardMaterial({color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 3});
+                const bullet = new THREE.Mesh(bulletGeom, bulletMat);
+                bullet.position.copy(randomAlien.mesh.position);
+                alienBullets.push(bullet);
+                scene.add(bullet);
+            }
+        }
+
+        // --- COLLISION DETECTION (CORRECTED) ---
+        function checkCollisions() {
+            // Player Bullets vs Aliens
+            for (let i = playerBullets.length - 1; i >= 0; i--) {
+                const bullet = playerBullets[i];
+                for (let j = aliens.length - 1; j >= 0; j--) {
+                    const alien = aliens[j];
+                    
+                    const dx = bullet.position.x - alien.mesh.position.x;
+                    const dz = bullet.position.z - alien.mesh.position.z;
+                    const distance = Math.sqrt(dx * dx + dz * dz);
+        
+                    const alienRadius = alien.isBoss ? 2.5 : 1.0;
+                    const bulletRadius = 0.75; // Half of bullet's length
+        
+                    if (distance < bulletRadius + alienRadius) {
+                        scene.remove(bullet);
+                        playerBullets.splice(i, 1);
+        
+                        alien.health--;
+                        
+                        const originalColor = alien.mesh.userData.originalColor;
+                        alien.mesh.material.color.set(0xffffff);
+                        alien.mesh.material.emissive.set(0xffffff);
+                        setTimeout(() => {
+                            if (alien.mesh && alien.mesh.material) {
+                                alien.mesh.material.color.set(originalColor);
+                                alien.mesh.material.emissive.set(originalColor);
+                            }
+                        }, 100);
+        
+                        if(alien.health <= 0) {
+                            score += alien.points; updateHUD();
+                            createParticleExplosion(alien.mesh.position, alien.mesh.material.emissive, 30);
+                            if(alien.isPowerUp) createPowerUp(alien.mesh.position);
+                            scene.remove(alien.mesh); aliens.splice(j, 1);
+                            explosionSynth();
+                        }
+                        
+                        break; // Bullet is gone, move to next bullet
+                    }
+                }
+            }
+        
+            // Alien Bullets vs Player
+            for (let i = alienBullets.length - 1; i >= 0; i--) {
+                const bullet = alienBullets[i];
+                
+                const dx = bullet.position.x - player.position.x;
+                const dz = bullet.position.z - player.position.z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+                const playerRadius = 1.5; // Based on wingspan
+                const bulletRadius = 0.2; // Based on sphere geometry
+        
+                if (distance < playerRadius + bulletRadius) {
+                    scene.remove(bullet); alienBullets.splice(i, 1);
+                    lives--; updateHUD(); explosionSynth();
+                    createParticleExplosion(player.position, 0x00ffff, 50);
+                    screenShake(0.2, 200);
+                    if (lives <= 0) gameOver();
+                    break;
+                }
+            }
+            
+            // Player vs Powerups
+            for (let i = powerUps.length - 1; i >= 0; i--) {
+                const powerUp = powerUps[i];
+                const dx = powerUp.position.x - player.position.x;
+                const dz = powerUp.position.z - player.position.z;
+                const distance = Math.sqrt(dx * dx + dz * dz);
+                const playerRadius = 1.5;
+                const powerUpRadius = 0.5;
+
+                if(distance < playerRadius + powerUpRadius) {
+                    activatePowerUp();
+                    scene.remove(powerUp);
+                    powerUps.splice(i, 1);
+                }
+            }
+            
+            // Bullets vs Barriers
+            const allBullets = [...playerBullets, ...alienBullets];
+            for (let i = allBullets.length - 1; i >= 0; i--) {
+                const bullet = allBullets[i];
+                if (!bullet) continue;
+                let bulletRemoved = false;
+                for (const barrier of barriers) {
+                    for (let j = barrier.cubes.length - 1; j >= 0; j--) {
+                        const cube = barrier.cubes[j];
+        
+                        // AABB check on XZ plane
+                        const halfCubeSize = 0.25;
+                        const cubeMinX = cube.position.x - halfCubeSize;
+                        const cubeMaxX = cube.position.x + halfCubeSize;
+                        const cubeMinZ = cube.position.z - halfCubeSize;
+                        const cubeMaxZ = cube.position.z + halfCubeSize;
+                        
+                        let bulletMinX, bulletMaxX, bulletMinZ, bulletMaxZ;
+                        const isPlayerBullet = playerBullets.includes(bullet);
+        
+                        if (isPlayerBullet) { // Player bullet: long cylinder
+                            bulletMinX = bullet.position.x - 0.1;
+                            bulletMaxX = bullet.position.x + 0.1;
+                            bulletMinZ = bullet.position.z - 0.75;
+                            bulletMaxZ = bullet.position.z + 0.75;
+                        } else { // Alien bullet: sphere
+                            bulletMinX = bullet.position.x - 0.2;
+                            bulletMaxX = bullet.position.x + 0.2;
+                            bulletMinZ = bullet.position.z - 0.2;
+                            bulletMaxZ = bullet.position.z + 0.2;
+                        }
+        
+                        if (bulletMaxX > cubeMinX && bulletMinX < cubeMaxX && bulletMaxZ > cubeMinZ && bulletMinZ < cubeMaxZ) {
+                            cube.userData.health--;
+                            cube.material.opacity = 0.2 + (cube.userData.health / 3) * 0.5;
+        
+                            if (cube.userData.health <= 0) {
+                                scene.remove(cube);
+                                barrier.cubes.splice(j, 1);
+                            }
+                            
+                            scene.remove(bullet);
+                            if (isPlayerBullet) {
+                                playerBullets.splice(playerBullets.indexOf(bullet), 1);
+                            } else if (alienBullets.includes(bullet)) {
+                                alienBullets.splice(alienBullets.indexOf(bullet), 1);
+                            }
+                            bulletRemoved = true;
+                            break;
+                        }
+                    }
+                    if (bulletRemoved) break;
+                }
+            }
+        
+            // Check for next wave condition
+            if(gameRunning && aliens.filter(a => !a.isPowerUp).length === 0) {
+                 nextWave();
+            }
+        }
+
+        function screenShake(intensity, duration) {
+            const start = Date.now();
+            const originalPos = camera.position.clone();
+            function shake() {
+                const elapsed = Date.now() - start;
+                if (elapsed < duration) {
+                    const progress = elapsed / duration;
+                    const damper = 1 - progress;
+                    camera.position.x = originalPos.x + (Math.random() - 0.5) * intensity * damper;
+                    camera.position.y = originalPos.y + (Math.random() - 0.5) * intensity * damper;
+                    requestAnimationFrame(shake);
+                } else {
+                    camera.position.copy(originalPos);
+                }
+            }
+            shake();
+        }
+        
+        function activatePowerUp() {
+            powerUpActive = true;
+            powerupSound();
+            if (powerUpTimeout) clearTimeout(powerUpTimeout);
+            powerUpTimeout = setTimeout(() => {
+                powerUpActive = false;
+            }, 5000); // 5 seconds
+        }
+
+        // --- Utility update functions in the loop ---
+        function updateBullets(delta) {
+            playerBullets.forEach((b, i) => { b.position.z -= 40 * delta; if (b.position.z < -10) { scene.remove(b); playerBullets.splice(i, 1); } });
+            alienBullets.forEach((b, i) => { b.position.z += 20 * delta; if (b.position.z > 20) { scene.remove(b); alienBullets.splice(i, 1); } });
+        }
+
+        function createPowerUp(position) {
+            const geom = new THREE.BoxGeometry(0.5,0.5,0.5);
+            const mat = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffa500, emissiveIntensity: 3 });
+            const powerUp = new THREE.Mesh(geom, mat);
+            powerUp.position.copy(position);
+            powerUps.push(powerUp);
+            scene.add(powerUp);
+        }
+
+        function updatePowerUps(delta) {
+             powerUps.forEach((p, i) => {
+                 p.rotation.y += 2 * delta;
+                 p.position.z += 5 * delta;
+                 if (p.position.z > 20) {
+                     scene.remove(p);
+                     powerUps.splice(i, 1);
+                 }
+             });
+        }
+        
+        let particleGeometry, particleMaterial, particleMesh;
+        function updateParticles(delta) {
+            if (!particleMesh && particles.length > 0) {
+                particleGeometry = new THREE.BufferGeometry();
+                particleMaterial = new THREE.PointsMaterial({ size: 0.5, vertexColors: true, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+                particleMesh = new THREE.Points(particleGeometry, particleMaterial);
+                scene.add(particleMesh);
+            }
+            if (!particleMesh) return;
+
+            const positions = [], colors = [];
+            for (let i = particles.length - 1; i >= 0; i--) {
+                const p = particles[i];
+                p.position.add(p.velocity);
+                p.life -= delta;
+                p.alpha -= delta * 2;
+                if (p.life <= 0) {
+                    particles.splice(i, 1);
+                    continue;
+                }
+                positions.push(p.position.x, p.position.y, p.position.z);
+                colors.push(p.color.r, p.color.g, p.color.b);
+            }
+            if (positions.length > 0) {
+                particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute(positions, 3));
+                particleGeometry.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+                particleGeometry.attributes.position.needsUpdate = true;
+                particleGeometry.attributes.color.needsUpdate = true;
+            } else if (particles.length === 0 && particleMesh) {
+                scene.remove(particleMesh);
+                particleMesh.geometry.dispose();
+                particleMesh.material.dispose();
+                particleMesh = undefined;
+            }
+        }
+
+        function createStarfield() {
+            const starGeo = new THREE.BufferGeometry();
+            const verts = [];
+            for (let i = 0; i < 15000; i++) {
+                verts.push((Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300, (Math.random() - 0.5) * 300);
+            }
+            starGeo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+            const starMat = new THREE.PointsMaterial({ color: 0xffffff, size: 0.1 });
+            starField = new THREE.Points(starGeo, starMat);
+            scene.add(starField);
+        }
+        
+        init();
+    </script>
+</body>
+</html>
+
+
+
