@@ -1622,8 +1622,13 @@
                 case 'KeyA':
                     input.left = true;
                     break;
+                // --- CORRECTION APPLIQUÉE ICI ---
                 case 'ArrowRight':
-// ... existing code ... -->
+                case 'KeyD': // Ajout de la touche D
+                    input.right = true; // Ajout de la logique pour aller à droite
+                    break; // Ajout du break manquant
+                case 'Space': // Ajout pour cohérence
+                case 'ArrowUp': // Ajout pour cohérence
                 case 'KeyW':
                     input.fire = true;
                     break;
@@ -1675,8 +1680,3 @@
     </script>
 </body>
 </html>
-
-
-
-
-
