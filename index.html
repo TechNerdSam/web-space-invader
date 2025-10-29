@@ -2,37 +2,39 @@
 <html lang="fr">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Elite Invaders 3D</title>
-    <!-- Importation de la police Sci-Fi "Orbitron" -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Elite Invaders 3D (Édition Ultime)</title> 
+    <!-- Importation de la police Sci-Fi "Orbitron" --><link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
     
-    <!-- 
-      Conformément au CDC (Section 9.1), nous utilisons une superposition HTML/CSS 
-      pour l'interface utilisateur (UI) par-dessus le canvas du jeu.
-    -->
     <style>
+        /* --- Styles de base et Conteneurs --- */
+        :root {
+            --neon-cyan: #00ffff;
+            --neon-red: #f00;
+            --neon-green: #0f0;
+            --neon-glow-cyan: 0 0 5px var(--neon-cyan), 0 0 10px var(--neon-cyan), 0 0 20px var(--neon-cyan);
+            --neon-glow-red: 0 0 5px var(--neon-red), 0 0 10px var(--neon-red), 0 0 20px var(--neon-red);
+        }
+
         body {
-            /* Utilisation de la nouvelle police */
             font-family: 'Orbitron', 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            /* Nouveau fond radial pour la profondeur */
             background: radial-gradient(ellipse at center, #1a2a40 0%, #000010 100%);
-            color: #00ffff; /* Nouvelle couleur de base "Cyan Neon" */
-            overflow: hidden; /* Empêche le défilement */
+            color: var(--neon-cyan);
+            overflow: hidden; 
+            -webkit-user-select: none; /* Empêche la sélection de texte */
+            user-select: none;
         }
 
-        /* Conteneur principal qui superpose l'UI et le Canvas */
         #game-container {
             position: relative;
             width: 100vw;
             height: 100vh;
         }
 
-        /* Le canvas de rendu 3D */
         #game-canvas {
             position: absolute;
             top: 0;
@@ -42,7 +44,6 @@
             z-index: 1;
         }
 
-        /* Superposition de l'UI (Section 9.1) */
         #ui-overlay {
             position: absolute;
             top: 0;
@@ -57,27 +58,30 @@
             pointer-events: none; 
         }
 
-        /* Menus qui doivent être cliquables */
+        /* --- Menus Généraux (Verre Dépoli) --- */
         .menu {
-            /* Effet "Verre Dépoli" moderne */
+            display: flex; /* Utilisé pour cacher/montrer */
+            flex-direction: column;
+            align-items: center;
             background-color: rgba(0, 20, 30, 0.75);
             backdrop-filter: blur(5px);
-            border: 2px solid #00ffff;
+            border: 2px solid var(--neon-cyan);
             border-radius: 10px;
             padding: 40px;
             text-align: center;
-            pointer-events: auto; /* Réactive les événements pour ce menu */
-            /* Ombre "Neon Glow" */
-            box-shadow: 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+            pointer-events: auto; 
+            box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 10px var(--neon-cyan);
             animation: pulse-glow 2s infinite alternate;
+            max-width: 90%;
+            box-sizing: border-box; /* Pour que le padding ne casse pas la largeur */
         }
         
         @keyframes pulse-glow {
             from {
-                box-shadow: 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+                box-shadow: 0 0 20px var(--neon-cyan), inset 0 0 10px var(--neon-cyan);
             }
             to {
-                box-shadow: 0 0 35px #00ffff, inset 0 0 15px #00ffff;
+                box-shadow: 0 0 35px var(--neon-cyan), inset 0 0 15px var(--neon-cyan);
             }
         }
 
@@ -86,24 +90,52 @@
             color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 3px;
-            /* Effet "Neon Glow" pour le texte */
-            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px var(--neon-cyan), 0 0 30px var(--neon-cyan);
         }
         
         .menu p {
             font-size: 1.2em;
-            text-shadow: 0 0 5px #00ffff;
+            text-shadow: 0 0 5px var(--neon-cyan);
         }
 
-        /* Panneau des scores */
+        /* --- Boutons et Interactivité (Feature 8) --- */
+        .menu button {
+            background-color: transparent;
+            color: var(--neon-cyan);
+            border: 2px solid var(--neon-cyan);
+            padding: 15px 30px;
+            font-size: 1.2em;
+            font-family: 'Orbitron', 'Arial', sans-serif;
+            text-transform: uppercase;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, box-shadow 0.3s, color 0.3s, transform 0.2s, letter-spacing 0.2s;
+            text-shadow: 0 0 10px var(--neon-cyan);
+            box-shadow: 0 0 10px var(--neon-cyan);
+            letter-spacing: 0px; /* Base pour l'animation */
+            margin-top: 10px;
+        }
+
+        .menu button:hover {
+            background-color: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 25px var(--neon-cyan), 0 0 40px #fff;
+            text-shadow: none;
+            transform: scale(1.05); /* Animation de survol */
+            letter-spacing: 1px; /* Animation de survol */
+        }
+
+        /* --- Tableau des scores --- */
         #leaderboard {
-            width: 80%;
+            width: 90%;
             margin: 20px auto;
             background: rgba(0, 255, 255, 0.05);
             border: 1px solid #00bfff;
             border-radius: 5px;
             padding: 10px;
             box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.5);
+            max-height: 150px;
+            overflow-y: auto;
         }
         #leaderboard h2 {
             margin: 0 0 10px 0;
@@ -116,37 +148,43 @@
             padding-left: 30px;
             margin: 0;
             text-align: left;
-            font-size: 1.1em;
-            color: #00ffff;
+            font-size: 1em; /* Réduit pour s'adapter */
+            color: var(--neon-cyan);
         }
         #high-score-list li {
             margin-bottom: 5px;
-            text-shadow: 0 0 5px #00ffff;
+            text-shadow: 0 0 5px var(--neon-cyan);
+            font-size: 1.1em;
+            white-space: nowrap; /* Empêche le retour à la ligne */
         }
 
-        .menu button {
-            background-color: transparent;
-            color: #00ffff;
-            border: 2px solid #00ffff;
-            padding: 15px 30px;
-            font-size: 1.2em;
+        /* --- Entrée de nom --- */
+        #score-submission {
+            display: none; /* Caché par défaut */
+            margin-top: 20px;
+            width: 100%;
+        }
+        #score-submission p {
+            font-size: 1.1em;
+            color: #fff;
+        }
+        #player-name {
             font-family: 'Orbitron', 'Arial', sans-serif;
-            text-transform: uppercase;
-            cursor: pointer;
+            font-size: 1em;
+            background: rgba(0,0,0,0.5);
+            border: 2px solid var(--neon-cyan);
+            color: #fff;
+            padding: 10px;
             border-radius: 5px;
-            transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
-            text-shadow: 0 0 10px #00ffff;
-            box-shadow: 0 0 10px #00ffff;
+            margin-right: 10px;
+            text-align: center;
+        }
+        #player-name:focus {
+            outline: none;
+            box-shadow: 0 0 15px var(--neon-cyan);
         }
 
-        .menu button:hover {
-            background-color: #00ffff;
-            color: #000;
-            box-shadow: 0 0 25px #00ffff, 0 0 40px #fff;
-            text-shadow: none;
-        }
-
-        /* HUD en jeu (Section 9.1) */
+        /* --- HUD et Éléments de Jeu --- */
         #hud {
             position: absolute;
             top: 20px;
@@ -155,111 +193,207 @@
             display: flex;
             justify-content: space-between;
             font-size: 1.5em;
-            color: #00ffff;
-            /* Effet "Neon Glow" pour le HUD */
-            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
+            color: var(--neon-cyan);
+            text-shadow: var(--neon-glow-cyan);
             display: none; /* Caché par défaut */
         }
+        /* Feature 6: Indicateur de Combo */
+        #combo-meter {
+            position: absolute;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5em;
+            color: var(--neon-green);
+            text-shadow: 0 0 10px var(--neon-green), 0 0 20px var(--neon-green);
+            display: none; /* Caché par défaut */
+            animation: pulse-combo 1s infinite alternate;
+        }
+        @keyframes pulse-combo {
+            from { opacity: 0.8; transform: translateX(-50%) scale(1); }
+            to { opacity: 1; transform: translateX(-50%) scale(1.05); }
+        }
 
-        /* Barre de vie du Boss (CDC 9.3) */
+        @media (max-width: 600px) {
+            #hud, #combo-meter {
+                font-size: 1em;
+                top: 10px;
+                left: 10px;
+                right: 10px;
+            }
+            #combo-meter {
+                left: 50%; /* Reste centré */
+            }
+        }
+
+        /* Barre de vie du Boss */
         #boss-health-bar {
             position: absolute;
-            top: 80px; /* Sous le HUD principal */
+            top: 80px; 
             left: 50%;
             transform: translateX(-50%);
             width: 50%;
             height: 20px;
             background-color: rgba(255, 0, 0, 0.1);
-            border: 2px solid #f00;
+            border: 2px solid var(--neon-red);
             border-radius: 5px;
-            display: none; /* Caché par défaut */
-            box-shadow: 0 0 15px #f00;
+            display: none; 
+            box-shadow: 0 0 15px var(--neon-red);
         }
         #boss-health {
             width: 100%;
             height: 100%;
-            background-color: #f00;
+            background-color: var(--neon-red);
             border-radius: 2px;
             transition: width 0.2s ease-out;
-            box-shadow: 0 0 10px #f00, 0 0 20px #f00;
+            box-shadow: var(--neon-glow-red);
         }
 
-        /* Écrans de la FSM Globale (Section 9.2) */
+        /* Feature 1: Indicateur de Charge (SUPPRIMÉ) */
+
+        /* --- Écrans FSM (Section 9.2) --- */
         #main-menu { display: flex; }
         #game-over-screen { display: none; }
         #loading-screen { display: flex; }
-        #pause-menu { display: none; } /* AJOUT: État de pause */
+        #pause-menu { display: none; }
+        #level-complete-message {
+            display: none;
+            z-index: 50; 
+            font-size: 2em;
+            text-shadow: 0 0 20px var(--neon-cyan);
+        }
+
+        /* --- Hit Flash --- */
+        #flash-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 0, 0, 0.5); /* Flash rouge */
+            z-index: 50;
+            display: none; /* Caché */
+            pointer-events: none;
+        }
+
+        /* Mode "sélectionné" pour la difficulté */
+        .difficulty-controls button.selected {
+            background-color: var(--neon-cyan);
+            color: #000;
+            box-shadow: 0 0 15px var(--neon-cyan);
+        }
+
+        /* --- Difficulté --- */
+        .difficulty-controls {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+            margin-bottom: 10px;
+        }
+        .difficulty-controls button {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--neon-cyan);
+            color: var(--neon-cyan);
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s, color 0.3s;
+            width: auto;
+            height: auto;
+            padding: 10px 15px;
+            font-size: 1em;
+            font-family: 'Orbitron', 'Arial', sans-serif;
+        }
+        .difficulty-controls button:hover {
+            background-color: var(--neon-cyan);
+            color: #000;
+        }
+
+        /* Textes de Score Flottants */
+        .floating-score {
+            position: absolute;
+            font-size: 1.2em;
+            color: #fff;
+            text-shadow: var(--neon-glow-cyan);
+            opacity: 0;
+            transition: opacity 1s, transform 1s;
+            transform: translateY(0);
+            pointer-events: none;
+            z-index: 60;
+        }
 
     </style>
 </head>
 <body>
 
-    <!-- 
-      Structure HTML (Section 9.1)
-      - game-container : Conteneur principal
-      - game-canvas : Rendu 3D (Three.js)
-      - ui-overlay : Superposition HTML pour l'UI
-    -->
     <div id="game-container">
         <canvas id="game-canvas"></canvas>
         
         <div id="ui-overlay">
             
-            <!-- État PRELOADING (Section 9.4) -->
-            <div id="loading-screen" class="menu">
+            <!-- État PRELOADING --><div id="loading-screen" class="menu">
                 <h1>ELITE INVADERS 3D</h1>
                 <p id="loading-text">CHARGEMENT DES SYSTÈMES...</p>
             </div>
 
-            <!-- État MAIN_MENU (Section 9.2) -->
-            <div id="main-menu" class="menu" style="display: none;">
+            <!-- État MAIN_MENU --><div id="main-menu" class="menu" style="display: none;">
                 <h1>ELITE INVADERS 3D</h1>
-                <!-- MODIFIÉ: Panneau des scores (CDC 9.6) -->
+                
+                <div class="difficulty-controls">
+                    <button id="difficulty-easy">FACILE</button>
+                    <button id="difficulty-medium" class="selected">MOYEN</button>
+                    <button id="difficulty-hard">DIFFICILE</button>
+                </div>
+
                 <div id="leaderboard">
                     <h2>MEILLEURS SCORES</h2>
                     <ol id="high-score-list">
-                        <li>---</li>
-                        <li>---</li>
                         <li>---</li>
                     </ol>
                 </div>
                 <button id="start-button">COMMENCER LA MISSION</button>
             </div>
 
-            <!-- État GAME_OVER (Section 9.2) -->
-            <div id="game-over-screen" class="menu" style="display: none;">
+            <!-- État GAME_OVER --><div id="game-over-screen" class="menu" style="display: none;">
                 <h1>MISSION ÉCHOUÉE</h1>
                 <p id="final-score">SCORE : 0</p>
+                
+                <div id="score-submission">
+                    <p>FÉLICITATIONS ! NOUVEAU MEILLEUR SCORE !</p>
+                    <input type="text" id="player-name" placeholder="VOTRE NOM" maxlength="10">
+                    <button id="submit-score-button">OK</button>
+                </div>
+                
                 <button id="restart-button">RÉESSAYER</button>
             </div>
 
-            <!-- AJOUT: État PAUSED (CDC 9.2) -->
-            <div id="pause-menu" class="menu" style="display: none;">
+            <!-- État PAUSED --><div id="pause-menu" class="menu" style="display: none;">
                 <h1>PAUSE</h1>
                 <button id="resume-button">REPRENDRE</button>
+                <button id="quit-button">QUITTER</button> 
             </div>
 
-            <!-- HUD (Head-Up Display) (Section 9.1) -->
-            <div id="hud">
+            <!-- Message "Niveau Terminé" --><div id="level-complete-message" class="menu">
+                <p>NIVEAU TERMINÉ</p>
+            </div>
+
+            <!-- HUD (Head-Up Display) --><div id="hud">
                 <div id="score">SCORE : 0</div>
-                <!-- AJOUT: Affichage du niveau -->
                 <div id="level">NIVEAU : 1</div>
                 <div id="lives">VIES : 3</div>
             </div>
+            
+            <!-- Feature 6: Indicateur de Combo --><div id="combo-meter">COMBO 2x</div>
 
-            <!-- AJOUT: Barre de vie du Boss (CDC 9.3) -->
-            <div id="boss-health-bar">
+            <!-- Barre de vie du Boss --><div id="boss-health-bar">
                 <div id="boss-health"></div>
             </div>
 
-        </div>
+            <!-- Feature 1: Indicateur de Charge (SUPPRIMÉ) --></div>
+        
+        <!-- Hit Flash --><div id="flash-overlay"></div>
+
     </div>
 
-    <!-- 
-      Importation de Three.js.
-      Nous utilisons un "importmap" pour gérer les modules JSM
-      nécessaires pour le post-traitement (Effet Bloom).
-    -->
     <script type="importmap">
     {
         "imports": {
@@ -271,7 +405,7 @@
 
     <script type="module">
     
-        // --- Imports 3D (y compris Post-Traitement) ---
+        // --- Imports 3D ---
         import * as THREE from 'three';
         import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
         import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
@@ -279,29 +413,29 @@
         import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
 
         // =====================================================================
-        // 1. FONDATIONS TECHNIQUES ET ARCHITECTURE (CDC Sections 2, 3)
+        // 1. FONDATIONS TECHNIQUES ET ARCHITECTURE
         // =====================================================================
 
         // --- 1.1 Moteurs 3D (Three.js) ---
         let scene, camera, renderer, clock;
-        // AJOUT: Compositeur pour le post-traitement (Bloom)
         let composer, bloomPass, filmPass;
-        let gameSize = { width: 20, height: 20 }; // Taille de la zone de jeu en unités 3D
+        let gameSize = { width: 20, height: 20 }; 
         
-        // --- 1.2 Boucle de Jeu (Game Loop) (CDC Section 2.2) ---
+        // --- 1.2 Boucle de Jeu ---
         let deltaTime = 0;
+        let gameTimeScale = 1.0; // Ralenti
 
-        // --- 1.3 FSM Globale (Gestionnaire d'état) (CDC Section 9.2) ---
+        // --- 1.3 FSM Globale ---
         const GAME_STATE = {
             PRELOADING: 'PRELOADING',
             MAIN_MENU: 'MAIN_MENU',
             PLAYING: 'PLAYING',
-            PAUSED: 'PAUSED', // AJOUT: État de pause (CDC 9.2)
+            PAUSED: 'PAUSED', 
             GAME_OVER: 'GAME_OVER'
         };
         let currentGameState = GAME_STATE.PRELOADING;
 
-        // --- 1.4 Architecture ECS (simplifiée) (CDC Section 3) ---
+        // --- 1.4 Architecture ECS (simplifiée) ---
         let entities = [];
         let player = null;
         let alienGrid = {
@@ -316,37 +450,50 @@
             toughAlienChance: 0.2 
         };
         
-        // --- 1.5 Gestion des Entrées (InputSystem) (CDC Section 3.3) ---
+        // --- 1.5 Gestion des Entrées ---
         const input = {
             left: false,
             right: false,
             fire: false,
+            dash: false, 
             currentMoveX: 0 
         };
 
-        // --- 1.6 Statistiques de jeu ---
+        // --- 1.6 Statistiques et Paramètres ---
         let score = 0;
         let lives = 55; // MODIFIÉ: 3 -> 55
         let currentLevel = 1; 
+        let gameSettings = {
+            difficulty: 'medium', 
+            masterVolume: 0.5,
+            sfxVolume: 0.7,
+            musicVolume: 0.3,
+            sfxMuted: false,
+            musicMuted: false,
+            scoreForNextLife: 10000 // Feature 7
+        };
+        let combo = { counter: 0, timer: 0 };
+        const COMBO_TIME = 2.0; 
 
-        // --- 1.7 Entités de jeu supplémentaires ---
+        // --- 1.7 Entités de jeu ---
         let shields = [];
         let ufo = null;
         let ufoSpawnTimer = 15.0; 
-        let starfield, starfield2; // AJOUT: 2e couche pour parallaxe
-        let nebula; // AJOUT: Nébuleuse
+        let starfield, starfield2, starfieldFar; // Ajout d'un 3ème starfield
+        let nebula, nebula2; // Ajout d'une 2ème nébuleuse
+        let planets = []; // Pour les nouvelles planètes
+        let dustParticles; // Pour les particules de poussière spatiale
         let boss = null; 
         let bossHealthBar, bossHealthElement;
+        let floatingScorePool = [];
 
         // =====================================================================
-        // 2. AUDIO (CDC Section 8)
+        // 2. AUDIO
         // =====================================================================
         
-        // --- 2.1 Web Audio API (CDC Section 8.1) ---
         let audioContext;
-        let sfxGain; // GainNode pour les SFX
-        let musicGain; // GainNode pour la musique
-        const audioBuffers = {}; // Stockage des sons pré-chargés
+        let sfxGain, musicGain;
+        const audioBuffers = {}; 
 
         class AudioEngine {
             async init() {
@@ -356,115 +503,108 @@
                 sfxGain = audioContext.createGain();
                 musicGain = audioContext.createGain();
                 
-                sfxGain.gain.value = 0.7;
-                musicGain.gain.value = 0.3;
-
                 sfxGain.connect(audioContext.destination);
                 musicGain.connect(audioContext.destination);
+                
+                this.createSyntheticSounds();
             }
-
-            // Pré-chargement (Section 9.4)
-            async loadSound(name, url) {
-                try {
-                    const response = await fetch(url);
-                    const arrayBuffer = await response.arrayBuffer();
-                    const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-                    audioBuffers[name] = audioBuffer;
-                } catch (e) {
-                    console.error(`Erreur lors du chargement du son ${name}:`, e);
+            
+            createSyntheticSounds() {
+                audioBuffers['shoot'] = this.createSynthSound(1046.50, 0.005, 0.05, 'sawtooth');
+                audioBuffers['explosion'] = this.createSynthSound(100, 0.01, 0.5, 'square', 50);
+                audioBuffers['hit'] = this.createSynthSound(440, 0.01, 0.2, 'triangle');
+                audioBuffers['dash'] = this.createSynthSound(1500, 0.01, 0.1, 'sawtooth', 1000);
+                audioBuffers['powerup'] = this.createSynthSound(1318.51, 0.01, 0.3, 'sine', 1500);
+                audioBuffers['charge_shot'] = this.createSynthSound(880, 0.01, 0.5, 'sawtooth', 600);
+                audioBuffers['shield_down'] = this.createSynthSound(2000, 0.01, 0.2, 'sawtooth', 500); // Feature 9
+                audioBuffers['one_up'] = this.createSynthSound(1396.91, 0.05, 0.5, 'sine', 1567.98); // Feature 7
+            }
+            
+            createSynthSound(freq, attack, decay, type, freqEnd = freq) {
+                const duration = attack + decay;
+                const sampleRate = audioContext.sampleRate;
+                const buffer = audioContext.createBuffer(1, sampleRate * duration, sampleRate);
+                const data = buffer.getChannelData(0);
+                let a = 0;
+                const attackSamples = sampleRate * attack;
+                const decaySamples = sampleRate * decay;
+                for (let i = 0; i < attackSamples; i++) {
+                    const t = i / sampleRate; const f = freq + (freqEnd - freq) * (i / attackSamples);
+                    a = i / attackSamples; data[i] = this.osc(t, f, type) * a;
+                }
+                for (let i = attackSamples; i < attackSamples + decaySamples; i++) {
+                    const t = i / sampleRate; const f = freqEnd;
+                    a = 1 - ((i - attackSamples) / decaySamples); data[i] = this.osc(t, f, type) * a;
+                }
+                return buffer;
+            }
+            
+            osc(t, f, type) {
+                const time = t * f * 2 * Math.PI;
+                switch(type) {
+                    case 'sine': return Math.sin(time);
+                    case 'square': return Math.sign(Math.sin(time));
+                    case 'sawtooth': return (t * f) % 1.0 - 0.5;
+                    case 'triangle': return Math.abs(((t * f) % 1.0) - 0.5) * 4 - 1;
+                    default: return Math.sin(time);
                 }
             }
-
-            // Jouer un son (AudioSystem)
+            
             playSound(name, spatialNode = null) {
                 if (!audioBuffers[name] || !audioContext) return;
-                
                 const source = audioContext.createBufferSource();
                 source.buffer = audioBuffers[name];
-
-                if (spatialNode) {
-                    source.connect(spatialNode);
-                    spatialNode.connect(sfxGain);
-                } else {
-                    source.connect(sfxGain);
-                }
+                if (spatialNode) { source.connect(spatialNode); spatialNode.connect(sfxGain); } 
+                else { source.connect(sfxGain); }
                 source.start(0);
             }
             
-            // Crée un nœud de spatialisation 3D (PannerNode)
             createSpatialNode() {
-                const panner = audioContext.createPanner();
-                panner.panningModel = 'HRTF';
-                panner.distanceModel = 'inverse';
-                panner.refDistance = 1;
-                panner.maxDistance = 100;
-                panner.rolloffFactor = 1;
+                const panner = audioContext.createPanner(); panner.panningModel = 'HRTF';
+                panner.distanceModel = 'inverse'; panner.refDistance = 1;
+                panner.maxDistance = 100; panner.rolloffFactor = 1;
                 return panner;
             }
         }
         const audioEngine = new AudioEngine();
 
         // =====================================================================
-        // 3. OPTIMISATION : OBJECT POOLING (CDC Section 4.1)
+        // 3. OPTIMISATION : OBJECT POOLING
         // =====================================================================
         
-        // --- Géométrie et Matériaux partagés (Refonte Visuelle) ---
-        
-        // Tirs (Lasers)
+        // --- Géométrie et Matériaux partagés ---
         const bulletGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
-        // MATÉRIAUX ÉMISSIFS pour l'effet Bloom
-        const playerBulletMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x00ff00, 
-            emissive: 0x00ff00, // Brille
-            emissiveIntensity: 5 // AUGMENTÉ (de 2 à 5)
-        });
-        const alienBulletMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0xff0000, 
-            emissive: 0xff0000, // Brille
-            emissiveIntensity: 5 // AUGMENTÉ (de 2 à 5)
-        });
-        
-        // Particules
+        const playerBulletMaterial = new THREE.MeshStandardMaterial({ color: 0x00ff00, emissive: 0x00ff00, emissiveIntensity: 5 });
+        const alienBulletMaterial = new THREE.MeshStandardMaterial({ color: 0xff0000, emissive: 0xff0000, emissiveIntensity: 5 });
         const particleGeometry = new THREE.BufferGeometry();
         particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0,0,0], 3));
-        const particleMaterial = new THREE.PointsMaterial({ 
-            color: 0xffaa00, 
-            size: 0.1, 
-            transparent: true,
-            blending: THREE.AdditiveBlending,
-            depthWrite: false // Important pour le blending
-        });
+        const particleMaterial = new THREE.PointsMaterial({ color: 0xffaa00, size: 0.1, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false });
+        const shieldGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2.5, 12); shieldGeometry.rotateX(Math.PI / 2); 
+        const shieldMaterial = new THREE.MeshStandardMaterial({ color: 0x0088ff, transparent: true, opacity: 0.6, metalness: 0.8, roughness: 0.1, emissive: 0x002288, emissiveIntensity: 1 });
         
-        // Boucliers (Nouveau design)
-        const shieldGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2.5, 12);
-        shieldGeometry.rotateX(Math.PI / 2); // Pivoter horizontalement
-        const shieldMaterial = new THREE.MeshStandardMaterial({ 
-            color: 0x0088ff, 
-            transparent: true, 
-            opacity: 0.6,
-            metalness: 0.8,
-            roughness: 0.1,
-            emissive: 0x002288,
-            emissiveIntensity: 1
-        });
-        
-        // Power-ups (Nouveau design "Cristal")
+        // Power-ups
         const powerUpGeometry = new THREE.TetrahedronGeometry(0.3);
         const powerUpMatRapid = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
         const powerUpMatSpread = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
         const powerUpMatShield = new THREE.MeshStandardMaterial({ color: 0x0088ff, emissive: 0x0088ff, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
+        const powerUpMatInvincible = new THREE.MeshStandardMaterial({ color: 0xffffff, emissive: 0xffffff, emissiveIntensity: 2, metalness: 0.8, roughness: 0.1 }); 
+        const powerUpMatSlowmo = new THREE.MeshStandardMaterial({ color: 0x888888, emissive: 0x888888, emissiveIntensity: 1, metalness: 0.9, roughness: 0.1 });
+        const powerUpMatSideShot = new THREE.MeshStandardMaterial({ color: 0x00ffaa, emissive: 0x00ffaa, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 }); // Feature 3
         
-        // UFO (Nouveau design "Soucoupe")
-        const ufoGeometry = new THREE.TorusGeometry(0.6, 0.2, 8, 16);
-        ufoGeometry.rotateX(Math.PI / 2);
+        const ufoGeometry = new THREE.TorusGeometry(0.6, 0.2, 8, 16); ufoGeometry.rotateX(Math.PI / 2);
         const ufoMaterial = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xaa0000, metalness: 0.9, roughness: 0.2 });
-        
-        // Aliens (Nouveau design "Drone")
-        const alienGeometry = new THREE.IcosahedronGeometry(0.5, 0); // Cristal
+        const alienGeometry = new THREE.IcosahedronGeometry(0.5, 0); 
         const alienMatNormal = new THREE.MeshStandardMaterial({ color: 0xff00ff, emissive: 0x550055, metalness: 0.8, roughness: 0.3 });
         const alienMatTough = new THREE.MeshStandardMaterial({ color: 0xff8800, emissive: 0x883300, metalness: 0.8, roughness: 0.3 });
 
-        // AJOUT: Lumières pour les tirs (pour le pooling)
+        // Feature 9: Bouclier Alien
+        const alienShieldGeometry = new THREE.SphereGeometry(0.7, 8, 6, 0, Math.PI * 2, 0, Math.PI / 2); // Demi-sphère
+        const alienShieldMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 1, transparent: true, opacity: 0.4, wireframe: true });
+
+        // Feature 10: Débris
+        const debrisGeometry = new THREE.IcosahedronGeometry(0.4, 0);
+        const debrisMaterial = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.5, roughness: 0.8 });
+
         const playerLightPool = [];
         const alienLightPool = [];
 
@@ -475,7 +615,6 @@
                 this.resetFn = resetFn;
                 this.expandPool(initialSize);
             }
-
             expandPool(size) {
                 for (let i = 0; i < size; i++) {
                     const obj = this.createFn();
@@ -484,412 +623,402 @@
                     this.pool.push(obj);
                 }
             }
-
             get() {
                 let obj = this.pool.find(o => !o.active);
                 if (!obj) {
                     this.expandPool(Math.floor(this.pool.length * 0.5));
                     obj = this.pool.find(o => !o.active);
                 }
-                
                 obj.active = true;
                 obj.mesh.visible = true;
                 this.resetFn(obj);
                 return obj;
             }
-
             release(obj) {
                 obj.active = false;
                 obj.mesh.visible = false;
                 obj.mesh.position.set(0, -100, 0);
-                
-                // CORRECTION: Logique de lumière déplacée vers resetBullet
-                // et les fonctions de spawn.
-                // Juste s'assurer de la retirer de la scène.
                 if (obj.light) {
                     obj.light.visible = false;
                     obj.mesh.remove(obj.light); 
-                    // Le pool correct (joueur/alien) sera géré
-                    // au prochain appel de resetBullet
+                    if (obj.light.color.getHex() === 0x00ff00) { playerLightPool.push(obj.light); } 
+                    else { alienLightPool.push(obj.light); }
+                    obj.light = null;
                 }
             }
-
             getActiveObjects() {
                 return this.pool.filter(o => o.active);
             }
         }
 
-        // Définition des pools
-        let bulletPool, particlePool, powerUpPool;
+        let bulletPool, particlePool, powerUpPool, debrisPool; // Feature 10
 
         // =====================================================================
-        // 4. ENTITÉS ET SYSTÈMES DE JEU (CDC Sections 3, 5, 6, 7)
+        // 4. ENTITÉS ET SYSTÈMES DE JEU
         // =====================================================================
 
-        // --- 4.1 Fonctions de création (pour les pools) ---
-
+        // --- 4.1 Fonctions de création (Pools) ---
         function createBulletEntity() {
-            const mesh = new THREE.Mesh(bulletGeometry, playerBulletMaterial); // CORRECTION: Ajout d'un matériau par défaut
+            const mesh = new THREE.Mesh(bulletGeometry, playerBulletMaterial);
             const audioNode = audioEngine.createSpatialNode();
-            
             const entity = {
-                mesh: mesh,
-                active: false,
-                type: 'bullet',
-                isPlayerBullet: true,
-                velocity: new THREE.Vector3(0, 5, 0),
-                lifetime: 2, 
-                collider: new THREE.Box3(),
-                audioNode: audioNode,
-                light: null // AJOUT: Pour la lumière dynamique
+                mesh: mesh, active: false, type: 'bullet', isPlayerBullet: true,
+                velocity: new THREE.Vector3(0, 5, 0), lifetime: 2, 
+                collider: new THREE.Box3(), audioNode: audioNode, light: null,
+                isCharged: false, damage: 1, target: null 
             };
             entities.push(entity);
             return entity;
         }
-        
         function createParticleEntity() {
             const mesh = new THREE.Points(particleGeometry, particleMaterial.clone());
             const entity = {
-                mesh: mesh,
-                active: false,
-                type: 'particle',
-                velocity: new THREE.Vector3(),
-                lifetime: 0.5,
-                baseSize: 0.1
+                mesh: mesh, active: false, type: 'particle',
+                velocity: new THREE.Vector3(), lifetime: 0.5, baseSize: 0.1
             };
             entities.push(entity);
             return entity;
         }
-
-        // Ajout : Power-Up (CDC 6.4)
         function createPowerUpEntity() {
             const mesh = new THREE.Mesh(powerUpGeometry, powerUpMatRapid.clone()); 
             const entity = {
-                mesh: mesh,
-                active: false,
-                type: 'powerup',
-                velocity: new THREE.Vector3(0, -2, 0), 
-                lifetime: 10.0, 
-                collider: new THREE.Box3(),
-                powerUpType: 'rapid_fire' 
+                mesh: mesh, active: false, type: 'powerup',
+                velocity: new THREE.Vector3(0, -2, 0), lifetime: 10.0, 
+                collider: new THREE.Box3(), powerUpType: 'rapid_fire' 
+            };
+            entities.push(entity);
+            return entity;
+        }
+        // Feature 10: Débris
+        function createDebrisEntity() {
+            const mesh = new THREE.Mesh(debrisGeometry, debrisMaterial.clone());
+            const entity = {
+                mesh: mesh, active: false, type: 'debris',
+                velocity: new THREE.Vector3(0, -1, 0), lifetime: 20.0,
+                rotationSpeed: new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).multiplyScalar(0.5)
             };
             entities.push(entity);
             return entity;
         }
 
-        // --- 4.2 Fonctions de "Reset" (pour les pools) ---
-
+        // --- 4.2 Fonctions de "Reset" (Pools) ---
         function resetBullet(bullet) {
             bullet.lifetime = 2;
             bullet.mesh.rotation.x = Math.PI / 2;
-            
-            // CORRECTION: Retirer l'ancienne lumière. La nouvelle sera ajoutée par le spawner.
+            bullet.mesh.scale.set(1, 1, 1);
+            bullet.damage = 1;
+            bullet.isCharged = false;
+            bullet.target = null;
             if (bullet.light) {
                 bullet.light.visible = false;
                 bullet.mesh.remove(bullet.light); 
-                
-                // Devine où la remettre en se basant sur la couleur
-                // (getHex() peut être lent, mais c'est plus robuste que le flag)
-                if (bullet.light.color.getHex() === 0x00ff00) { 
-                    playerLightPool.push(bullet.light);
-                } else {
-                    alienLightPool.push(bullet.light);
-                }
+                if (bullet.light.color.getHex() === 0x00ff00) { playerLightPool.push(bullet.light); } 
+                else { alienLightPool.push(bullet.light); }
                 bullet.light = null;
             }
         }
-        
         function resetParticle(particle) {
             particle.lifetime = 0.5 + Math.random() * 0.5;
-            particle.velocity.set(
-                (Math.random() - 0.5) * 5,
-                (Math.random() - 0.5) * 5,
-                (Math.random() - 0.5) * 5
-            );
+            particle.velocity.set( (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5, (Math.random() - 0.5) * 5 );
             particle.mesh.material.opacity = 1;
             particle.mesh.material.size = particle.baseSize + Math.random() * 0.1;
         }
-        
-        // Ajout : Power-Up (CDC 6.4)
+        // Feature 3: Tirs Latéraux
         function resetPowerUp(powerUp) {
             powerUp.lifetime = 10.0;
             powerUp.velocity.set(0, -2, 0);
             
             const rand = Math.random();
-            if (rand < 0.4) {
-                powerUp.powerUpType = 'rapid_fire';
-                powerUp.mesh.material = powerUpMatRapid;
-            } else if (rand < 0.8) {
-                powerUp.powerUpType = 'spread_shot';
-                powerUp.mesh.material = powerUpMatSpread;
-            } else {
-                powerUp.powerUpType = 'shield';
-                powerUp.mesh.material = powerUpMatShield;
-            }
+            if (rand < 0.25) { powerUp.powerUpType = 'rapid_fire'; powerUp.mesh.material = powerUpMatRapid; } 
+            else if (rand < 0.5) { powerUp.powerUpType = 'spread_shot'; powerUp.mesh.material = powerUpMatSpread; } 
+            else if (rand < 0.7) { powerUp.powerUpType = 'shield'; powerUp.mesh.material = powerUpMatShield; } 
+            else if (rand < 0.8) { powerUp.powerUpType = 'invincible'; powerUp.mesh.material = powerUpMatInvincible; } 
+            else if (rand < 0.9) { powerUp.powerUpType = 'slowmo'; powerUp.mesh.material = powerUpMatSlowmo; } 
+            else { powerUp.powerUpType = 'side_shot'; powerUp.mesh.material = powerUpMatSideShot; } // Feature 3
+            
             powerUp.mesh.rotation.x = Math.random() * Math.PI;
             powerUp.mesh.rotation.y = Math.random() * Math.PI;
         }
+        // Feature 10: Débris
+        function resetDebris(debris) {
+            debris.lifetime = 20.0 + Math.random() * 10;
+            debris.velocity.set(0, -(Math.random() * 0.5 + 0.5), 0); // Vitesse Y négative
+            debris.mesh.scale.setScalar(Math.random() * 0.5 + 0.5); // Taille aléatoire
+            debris.mesh.position.set(
+                (Math.random() - 0.5) * gameSize.width * 2,
+                gameSize.height / 2 + 5, // Commence en haut
+                (Math.random() - 0.5) * 30 - 20 // Profondeur aléatoire
+            );
+        }
 
-        // --- 4.3 Création des Entités initiales (Joueur, Aliens) ---
-        
-        // MODIFIÉ (CDC 10.1) : NOUVEAU DESIGN DE VAISSEAU AAA 2025
+        // --- 4.3 Création des Entités initiales ---
+        // Feature 4: Animation d'Entrée
         function createPlayer() {
             const playerGroup = new THREE.Group();
-            
-            // Matériaux métalliques améliorés
             const darkGray = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
             const lightGray = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6, roughness: 0.4 });
-            // Matériau de réacteur émissif (pour le Bloom)
-            const brightBlue = new THREE.MeshStandardMaterial({ 
-                color: 0x00aaff, 
-                emissive: 0x00aaff, // Brille
-                emissiveIntensity: 3 
-            });
+            const brightBlue = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x00aaff, emissiveIntensity: 3 });
             const redGlass = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0.7, roughness: 0.2, emissive: 0x330000 });
-            
-            // Corps principal 
-            const bodyShape = new THREE.Shape();
-            bodyShape.moveTo(0, 0.5);
-            bodyShape.lineTo(0.8, 0);
-            bodyShape.lineTo(0, -0.5);
-            bodyShape.lineTo(-0.8, 0);
-            bodyShape.lineTo(0, 0.5);
+            const bodyShape = new THREE.Shape(); bodyShape.moveTo(0, 0.5); bodyShape.lineTo(0.8, 0); bodyShape.lineTo(0, -0.5); bodyShape.lineTo(-0.8, 0); bodyShape.lineTo(0, 0.5);
             const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, { depth: 0.5, bevelEnabled: false });
-            const body = new THREE.Mesh(bodyGeometry, darkGray);
-            body.rotation.x = Math.PI / 2;
-            body.position.z = -0.25;
-            playerGroup.add(body);
-
-            // Cockpit 
+            const body = new THREE.Mesh(bodyGeometry, darkGray); body.rotation.x = Math.PI / 2; body.position.z = -0.25; playerGroup.add(body);
             const cockpitGeometry = new THREE.SphereGeometry(0.3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
-            const cockpit = new THREE.Mesh(cockpitGeometry, redGlass);
-            cockpit.position.set(0, 0.2, 0.2);
-            playerGroup.add(cockpit);
-
-            // Ailes latérales
-            const wingShape = new THREE.Shape();
-            wingShape.moveTo(0, 0);
-            wingShape.lineTo(1.5, 0.2);
-            wingShape.lineTo(1.5, -0.2);
-            wingShape.lineTo(0, -0.4);
-            wingShape.lineTo(0, 0);
+            const cockpit = new THREE.Mesh(cockpitGeometry, redGlass); cockpit.position.set(0, 0.2, 0.2); playerGroup.add(cockpit);
+            const wingShape = new THREE.Shape(); wingShape.moveTo(0, 0); wingShape.lineTo(1.5, 0.2); wingShape.lineTo(1.5, -0.2); wingShape.lineTo(0, -0.4); wingShape.lineTo(0, 0);
             const wingGeometry = new THREE.ExtrudeGeometry(wingShape, { depth: 0.2, bevelEnabled: false });
-            
-            const leftWing = new THREE.Mesh(wingGeometry, lightGray);
-            leftWing.position.set(-1.0, 0, 0);
-            leftWing.rotation.y = Math.PI; 
-            playerGroup.add(leftWing);
-
-            const rightWing = new THREE.Mesh(wingGeometry, lightGray);
-            rightWing.position.set(1.0, 0, 0);
-            playerGroup.add(rightWing);
-            
-            // Canons latéraux
+            const leftWing = new THREE.Mesh(wingGeometry, lightGray); leftWing.position.set(-1.0, 0, 0); leftWing.rotation.y = Math.PI; playerGroup.add(leftWing);
+            const rightWing = new THREE.Mesh(wingGeometry, lightGray); rightWing.position.set(1.0, 0, 0); playerGroup.add(rightWing);
             const canonGeometry = new THREE.CylinderGeometry(0.08, 0.08, 0.5, 8);
             const canonMaterial = new THREE.MeshStandardMaterial({ color: 0x555555, metalness: 0.9, roughness: 0.3 });
-            
-            const leftCanon = new THREE.Mesh(canonGeometry, canonMaterial);
-            leftCanon.position.set(-0.8, 0.5, 0);
-            leftCanon.rotation.x = Math.PI / 2;
-            playerGroup.add(leftCanon);
-
-            const rightCanon = new THREE.Mesh(canonGeometry, canonMaterial);
-            rightCanon.position.set(0.8, 0.5, 0);
-            rightCanon.rotation.x = Math.PI / 2;
-            playerGroup.add(rightCanon);
-
-            // Réacteurs arrière (effets lumineux)
+            const leftCanon = new THREE.Mesh(canonGeometry, canonMaterial); leftCanon.position.set(-0.8, 0.5, 0); leftCanon.rotation.x = Math.PI / 2; playerGroup.add(leftCanon);
+            const rightCanon = new THREE.Mesh(canonGeometry, canonMaterial); rightCanon.position.set(0.8, 0.5, 0); rightCanon.rotation.x = Math.PI / 2; playerGroup.add(rightCanon);
             const jetGeometry = new THREE.CylinderGeometry(0.2, 0.3, 0.4, 8);
-            const jet = new THREE.Mesh(jetGeometry, brightBlue);
-            jet.position.set(0, -0.7, 0);
-            jet.rotation.x = Math.PI / 2;
-            playerGroup.add(jet);
-            
-            // AJOUT: Lumière du réacteur (pour le Bloom)
-            const jetLight = new THREE.PointLight(0x00aaff, 2, 5);
-            jetLight.position.set(0, -0.8, 0);
-            playerGroup.add(jetLight);
-            
+            const jet = new THREE.Mesh(jetGeometry, brightBlue); jet.position.set(0, -0.7, 0); jet.rotation.x = Math.PI / 2; playerGroup.add(jet);
+            const jetLight = new THREE.PointLight(0x00aaff, 2, 5); jetLight.position.set(0, -0.8, 0); playerGroup.add(jetLight);
             playerGroup.scale.set(1.2, 1.2, 1.2); 
-            playerGroup.position.y = -gameSize.height / 2 + 2;
+            
+            // Feature 4: Position de départ
+            const targetEnterY = -gameSize.height / 2 + 2;
+            playerGroup.position.y = -gameSize.height / 2 - 3; // Commence en bas
             
             const audioNode = audioEngine.createSpatialNode();
-            
-            // Bouclier personnel (CDC 6.4) - Look amélioré
             const shieldGeometry = new THREE.SphereGeometry(1.2, 16, 16);
-            const shieldMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x00ffff, 
-                emissive: 0x00ffff,
-                emissiveIntensity: 1,
-                transparent: true, 
-                opacity: 0.3,
-                wireframe: true 
-            });
+            const shieldMaterial = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 1, transparent: true, opacity: 0.3, wireframe: true });
             const playerShieldMesh = new THREE.Mesh(shieldGeometry, shieldMaterial);
-            playerShieldMesh.visible = false; 
-            playerGroup.add(playerShieldMesh);
+            playerShieldMesh.visible = false; playerGroup.add(playerShieldMesh);
 
             player = {
-                mesh: playerGroup, 
-                active: true,
-                type: 'player',
-                collider: new THREE.Box3(),
-                audioNode: audioNode,
-                fireCooldown: 0,
-                baseFireRate: 0.2,
-                fireRate: 0.2,
-                powerUpState: 'none',
-                powerUpTimer: 0,
-                targetRotationY: 0,
-                targetRotationX: 0,
-                currentRotationY: 0,
-                currentRotationX: 0,
-                shield: { 
-                    active: false,
-                    mesh: playerShieldMesh
-                }
+                mesh: playerGroup, active: true, type: 'player',
+                collider: new THREE.Box3(), audioNode: audioNode,
+                fireCooldown: 0, baseFireRate: 0.2, fireRate: 0.2,
+                sideFireCooldown: 0, // Feature 3
+                powerUpState: 'none', powerUpTimer: 0,
+                targetRotationY: 0, targetRotationY: 0, currentRotationY: 0, currentRotationX: 0,
+                targetRotationZ: 0, currentRotationZ: 0, 
+                shield: { active: false, mesh: playerShieldMesh },
+                dashCooldown: 0, isDashing: false, invincibleTimer: 0, thrusterTimer: 0, 
+                isCharging: false, chargeTimer: 0, 
+                isEntering: true, targetEnterY: targetEnterY, // Feature 4
             };
+            player.baseMaterials = { body: body.material, leftWing: leftWing.material, rightWing: rightWing.material };
             scene.add(player.mesh);
             entities.push(player);
         }
-
+        
+        // Feature 9: Bouclier Alien
         function createAlien(x, y) {
             const isTough = Math.random() < alienGrid.toughAlienChance;
             const alienHealth = isTough ? 2 : 1;
-            // Utilise le nouveau matériau
             const alienMaterial = isTough ? alienMatTough : alienMatNormal;
             
-            // Utilise la nouvelle géométrie
             const mesh = new THREE.Mesh(alienGeometry, alienMaterial.clone());
             mesh.position.set(x, y, 0);
             
             const audioNode = audioEngine.createSpatialNode();
-
             const alien = {
-                mesh: mesh,
-                active: true,
-                type: 'alien',
-                collider: new THREE.Box3(),
-                audioNode: audioNode,
-                health: alienHealth,
-                baseMaterial: alienMaterial 
+                mesh: mesh, active: true, type: 'alien',
+                collider: new THREE.Box3(), audioNode: audioNode,
+                health: alienHealth, baseMaterial: alienMaterial,
+                isKamikaze: false, // Feature 2
+                hasShield: false, shieldMesh: null // Feature 9
             };
+            
+            // Feature 9: Ajout du bouclier
+            if (!isTough && Math.random() < 0.2) { // 20% chance pour les aliens normaux
+                alien.hasShield = true;
+                alien.shieldMesh = new THREE.Mesh(alienShieldGeometry, alienShieldMaterial);
+                alien.shieldMesh.position.y = -0.2; // Ajuste la position
+                mesh.add(alien.shieldMesh);
+            }
+
             scene.add(mesh);
             entities.push(alien);
             alienGrid.aliens.push(alien);
         }
 
-        // Création du Boss (CDC 6.3) - Design amélioré
+        // Feature 5: Nouvelle attaque de Boss
         function createBoss() {
-            alienGrid.aliens.forEach(a => {
-                if (a.mesh) scene.remove(a.mesh);
-                a.active = false;
-            });
+            alienGrid.aliens.forEach(a => { if (a.mesh) scene.remove(a.mesh); a.active = false; });
             alienGrid.aliens = [];
             
-            // Groupe pour le boss
             const bossGroup = new THREE.Group();
-            
-            // Matériau du boss (métallique, émissif)
-            const bossMaterial = new THREE.MeshStandardMaterial({ 
-                color: 0x880000, 
-                metalness: 0.9, 
-                roughness: 0.2,
-                emissive: 0x330000,
-                emissiveIntensity: 2
-            });
-            
-            // Corps central
-            const bodyGeo = new THREE.BoxGeometry(6, 2, 2);
-            const body = new THREE.Mesh(bodyGeo, bossMaterial);
-            bossGroup.add(body);
-            
-            // Canons latéraux
+            const bossMaterial = new THREE.MeshStandardMaterial({ color: 0x880000, metalness: 0.9, roughness: 0.2, emissive: 0x330000, emissiveIntensity: 2 });
+            const bodyGeo = new THREE.BoxGeometry(6, 2, 2); bossGroup.add(new THREE.Mesh(bodyGeo, bossMaterial));
             const canonGeo = new THREE.CylinderGeometry(0.5, 0.5, 2, 12);
-            const leftCanon = new THREE.Mesh(canonGeo, bossMaterial);
-            leftCanon.position.set(-3, 0, 0);
-            leftCanon.rotation.z = Math.PI / 2;
-            bossGroup.add(leftCanon);
+            const leftCanon = new THREE.Mesh(canonGeo, bossMaterial); leftCanon.position.set(-3, 0, 0); leftCanon.rotation.z = Math.PI / 2; bossGroup.add(leftCanon);
+            const rightCanon = new THREE.Mesh(canonGeo, bossMaterial); rightCanon.position.set(3, 0, 0); rightCanon.rotation.z = Math.PI / 2; bossGroup.add(rightCanon);
             
-            const rightCanon = new THREE.Mesh(canonGeo, bossMaterial);
-            rightCanon.position.set(3, 0, 0);
-            rightCanon.rotation.z = Math.PI / 2;
-            bossGroup.add(rightCanon);
-            
-            bossGroup.position.set(0, gameSize.height / 2 + 5, 0); // Commence hors écran
-            
+            bossGroup.position.set(0, gameSize.height / 2 + 5, 0); 
             const audioNode = audioEngine.createSpatialNode();
+            const healthMultiplier = gameSettings.difficulty === 'easy' ? 0.7 : (gameSettings.difficulty === 'hard' ? 1.5 : 1);
+            const baseHealth = 50 + (currentLevel * 10);
             
             boss = {
-                mesh: bossGroup, // Utilise le groupe
-                active: true,
-                type: 'boss',
-                collider: new THREE.Box3(),
-                audioNode: audioNode,
-                maxHealth: 50 + (currentLevel * 10),
-                health: 50 + (currentLevel * 10),
+                mesh: bossGroup, active: true, type: 'boss',
+                collider: new THREE.Box3(), audioNode: audioNode,
+                maxHealth: baseHealth * healthMultiplier, health: baseHealth * healthMultiplier,
                 baseMaterial: bossMaterial,
-                fsm: {
+                fsm: { 
                     state: 'ENTERING', 
-                    timer: 3.0,
-                    targetY: gameSize.height / 2 - 4 
+                    timer: 3.0, 
+                    targetY: gameSize.height / 2 - 4,
+                    barrageCount: 0 // Feature 5
                 },
                 fireCooldown: 0.1
             };
             scene.add(boss.mesh);
             entities.push(boss);
-            
             bossHealthBar.style.display = 'block';
             updateHUD();
         }
-
-        // Boucliers (CDC 6.5) - Nouveau design
         function createShields() {
-            const positions = [-6, -2, 2, 6]; // Positions X
-            
+            const positions = [-6, -2, 2, 6]; 
             for (const x of positions) {
-                // Utilise la nouvelle géométrie (cylindre horizontal)
                 const mesh = new THREE.Mesh(shieldGeometry, shieldMaterial.clone());
                 mesh.position.set(x, -gameSize.height / 2 + 5, 0);
-                
                 const shield = {
-                    mesh: mesh,
-                    active: true,
-                    type: 'shield',
-                    collider: new THREE.Box3(),
-                    health: 10 
+                    mesh: mesh, active: true, type: 'shield',
+                    collider: new THREE.Box3(), health: 10, regenTimer: 0 
                 };
-                scene.add(mesh);
-                shields.push(shield);
-                entities.push(shield);
+                scene.add(mesh); shields.push(shield); entities.push(shield);
             }
         }
-        
-        // Vaisseau Mystère (UFO) (CDC 5.3) - Nouveau design
         function createUFO() {
             if (ufo) return; 
-
-            // Utilise la nouvelle géométrie (Torus)
             const mesh = new THREE.Mesh(ufoGeometry, ufoMaterial);
             mesh.position.set(-gameSize.width / 2 - 2, gameSize.height / 2 - 1, 0); 
-            
             ufo = {
-                mesh: mesh,
-                active: true,
-                type: 'ufo',
-                collider: new THREE.Box3(),
-                velocity: new THREE.Vector3(3, 0, 0),
-                health: 1
+                mesh: mesh, active: true, type: 'ufo',
+                collider: new THREE.Box3(), velocity: new THREE.Vector3(3, 0, 0),
+                health: 1, fireCooldown: 1.5 + Math.random() * 1.5 
             };
-            scene.add(mesh);
-            entities.push(ufo);
+            scene.add(mesh); entities.push(ufo);
+        }
+        
+        // --- Amélioration de l'arrière-plan (Nouveautés) ---
+        function createStarfield(count = 5000, size = 0.1, zPos = -50, speed = 0.2, color = 0xffffff, range = 100) {
+            const positions = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * range;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * range;
+                positions[i * 3 + 2] = (Math.random() - 0.5) * range / 2 + zPos;
+                sizes[i] = size * (0.5 + Math.random()); // Variété de taille
+            }
+            const starGeometry = new THREE.BufferGeometry();
+            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            starGeometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            // Utiliser PointsMaterial pour la taille variable si la version de Three.js le supporte nativement
+            // ou un ShaderMaterial personnalisé pour plus de contrôle.
+            // Pour l'instant, on se contente de la taille globale et de l'opacité.
+            const starMaterial = new THREE.PointsMaterial({
+                color: color, 
+                size: size, 
+                transparent: true, 
+                opacity: 0.6 + Math.random() * 0.4, // Opacité variable
+                blending: THREE.AdditiveBlending, 
+                depthWrite: false 
+            });
+            const field = new THREE.Points(starGeometry, starMaterial);
+            scene.add(field);
+            return { mesh: field, speed: speed, zPos: zPos, range: range };
+        }
+
+        function createNebulaLayer(count = 1000, size = 5, zPos = -60, colors = [0xaa00ff, 0x00aaff, 0xff00aa], opacity = 0.05, range = 40, yRange = 20, speed = 0.05) {
+            const positions = new Float32Array(count * 3);
+            const vertexColors = new Float32Array(count * 3);
+            const color = new THREE.Color();
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * range; 
+                positions[i * 3 + 1] = (Math.random() - 0.5) * yRange; 
+                positions[i * 3 + 2] = zPos - Math.random() * range / 2; 
+                const c = colors[Math.floor(Math.random() * colors.length)];
+                color.set(c);
+                vertexColors[i * 3] = color.r; vertexColors[i * 3 + 1] = color.g; vertexColors[i * 3 + 2] = color.b;
+            }
+            const nebulaGeometry = new THREE.BufferGeometry();
+            nebulaGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            nebulaGeometry.setAttribute('color', new THREE.BufferAttribute(vertexColors, 3));
+            const nebulaMaterial = new THREE.PointsMaterial({ 
+                size: size, 
+                transparent: true, 
+                opacity: opacity, 
+                blending: THREE.AdditiveBlending, 
+                depthWrite: false, 
+                vertexColors: true 
+            });
+            const nebulaMesh = new THREE.Points(nebulaGeometry, nebulaMaterial);
+            scene.add(nebulaMesh);
+            return { mesh: nebulaMesh, speed: speed, zPos: zPos, range: range };
+        }
+
+        // Nouvelle fonction pour les planètes/astéroïdes lointains
+        function createPlanets(count = 3) {
+            const planetGeometries = [
+                new THREE.SphereGeometry(1.5, 32, 32),
+                new THREE.OctahedronGeometry(1.2),
+                new THREE.IcosahedronGeometry(1.8)
+            ];
+            const planetMaterials = [
+                new THREE.MeshStandardMaterial({ color: 0x554477, metalness: 0.7, roughness: 0.8, emissive: 0x110022, emissiveIntensity: 0.5 }),
+                new THREE.MeshStandardMaterial({ color: 0x886633, metalness: 0.5, roughness: 0.9, emissive: 0x221100, emissiveIntensity: 0.3 }),
+                new THREE.MeshStandardMaterial({ color: 0x448866, metalness: 0.6, roughness: 0.7, emissive: 0x002211, emissiveIntensity: 0.4 })
+            ];
+
+            for (let i = 0; i < count; i++) {
+                const geo = planetGeometries[Math.floor(Math.random() * planetGeometries.length)];
+                const mat = planetMaterials[Math.floor(Math.random() * planetMaterials.length)];
+                const planetMesh = new THREE.Mesh(geo, mat);
+                
+                planetMesh.position.set(
+                    (Math.random() - 0.5) * gameSize.width * 5,
+                    (Math.random() - 0.5) * gameSize.height * 2 + gameSize.height, // Commence bien au-dessus
+                    -40 - Math.random() * 60 // Profondeur variable
+                );
+                planetMesh.scale.setScalar(2 + Math.random() * 3); // Grandes planètes
+                planetMesh.rotation.set(Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI);
+
+                scene.add(planetMesh);
+                planets.push({
+                    mesh: planetMesh,
+                    speed: 0.05 + Math.random() * 0.1, // Vitesse de défilement
+                    rotationSpeed: new THREE.Vector3((Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01, (Math.random()-0.5)*0.01)
+                });
+            }
+        }
+
+        // Nouvelle fonction pour les particules de poussière subtiles
+        function createDustParticles(count = 500) {
+            const positions = new Float32Array(count * 3);
+            const sizes = new Float32Array(count);
+            for (let i = 0; i < count; i++) {
+                positions[i * 3] = (Math.random() - 0.5) * gameSize.width * 2;
+                positions[i * 3 + 1] = (Math.random() - 0.5) * gameSize.height * 2;
+                positions[i * 3 + 2] = -10 - Math.random() * 20; // Proche du joueur
+                sizes[i] = 0.02 + Math.random() * 0.05;
+            }
+            const geometry = new THREE.BufferGeometry();
+            geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+            const material = new THREE.PointsMaterial({
+                color: 0xcccccc,
+                size: 0.08, // Taille globale pour les points
+                transparent: true,
+                opacity: 0.1,
+                blending: THREE.AdditiveBlending,
+                depthWrite: false
+            });
+            const dust = new THREE.Points(geometry, material);
+            scene.add(dust);
+            return dust;
         }
 
         function createAlienGrid() {
-            alienGrid.speed = alienGrid.baseSpeed + (currentLevel * 0.05);
-            alienGrid.fireRate = Math.min(0.1, alienGrid.baseFireRate + (currentLevel * 0.002));
+            const speedMultiplier = gameSettings.difficulty === 'easy' ? 0.8 : (gameSettings.difficulty === 'hard' ? 1.3 : 1);
+            const fireRateMultiplier = gameSettings.difficulty === 'easy' ? 0.7 : (gameSettings.difficulty === 'hard' ? 1.4 : 1);
+            alienGrid.speed = (alienGrid.baseSpeed + (currentLevel * 0.05)) * speedMultiplier;
+            alienGrid.fireRate = Math.min(0.1, (alienGrid.baseFireRate + (currentLevel * 0.002)) * fireRateMultiplier);
             alienGrid.toughAlienChance = Math.min(0.6, 0.2 + (currentLevel * 0.02));
-
             const rows = Math.min(5, 3 + Math.floor(currentLevel / 3)); 
             const cols = 8;
             const startX = - (cols / 2) * 1.5 + 0.75;
@@ -901,81 +1030,17 @@
             }
         }
         
-        // AJOUT (CDC 4.3) : Arrière-plan "Starfield" (Amélioré)
-        function createStarfield(count = 5000, size = 0.1, zPos = -50) {
-            const starCount = count;
-            const positions = new Float32Array(starCount * 3);
-            
-            for (let i = 0; i < starCount; i++) {
-                positions[i * 3    ] = (Math.random() - 0.5) * 100; // x
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 100; // y
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 50 + zPos; // z (profondeur)
-            }
-            
-            const starGeometry = new THREE.BufferGeometry();
-            starGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            
-            const starMaterial = new THREE.PointsMaterial({
-                color: 0xffffff,
-                size: size,
-                transparent: true,
-                opacity: 0.8,
-                depthWrite: false
-            });
-            
-            const field = new THREE.Points(starGeometry, starMaterial);
-            scene.add(field);
-            return field;
-        }
-        
-        // AJOUT: Nébuleuse (simulée avec des points)
-        function createNebula() {
-            const nebulaCount = 1000;
-            const positions = new Float32Array(nebulaCount * 3);
-            const colors = new Float32Array(nebulaCount * 3);
-            const color = new THREE.Color();
-            
-            const nebulaColors = [new THREE.Color(0xaa00ff), new THREE.Color(0x00aaff), new THREE.Color(0xff00aa)];
-
-            for (let i = 0; i < nebulaCount; i++) {
-                // Position en "nuage"
-                positions[i * 3    ] = (Math.random() - 0.5) * 40; // x
-                positions[i * 3 + 1] = (Math.random() - 0.5) * 20 + 5; // y (centré haut)
-                positions[i * 3 + 2] = -60 - Math.random() * 20; // z (très loin)
-                
-                // Couleur aléatoire
-                const c = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
-                color.set(c);
-                colors[i * 3    ] = color.r;
-                colors[i * 3 + 1] = color.g;
-                colors[i * 3 + 2] = color.b;
-            }
-            
-            const nebulaGeometry = new THREE.BufferGeometry();
-            nebulaGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-            nebulaGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
-            
-            const nebulaMaterial = new THREE.PointsMaterial({
-                size: 5, // Grosses particules
-                transparent: true,
-                opacity: 0.05, // Très faible opacité
-                blending: THREE.AdditiveBlending,
-                depthWrite: false,
-                vertexColors: true // Utilise les couleurs définies
-            });
-            
-            nebula = new THREE.Points(nebulaGeometry, nebulaMaterial);
-            scene.add(nebula);
-        }
-        
-        // --- 4.4 "Juiciness" : Screenshake (CDC Section 7.1) ---
+        // --- 4.4 "Juiciness" (Feedback) ---
         let shake = { intensity: 0, duration: 0 };
         function triggerScreenshake(intensity, duration) {
             shake.intensity = Math.max(shake.intensity, intensity);
             shake.duration = Math.max(shake.duration, duration);
         }
-
-        // --- 4.5 "Juiciness" : Particules (CDC Section 7.3) ---
+        function triggerHitFlash() {
+            const flash = document.getElementById('flash-overlay');
+            flash.style.display = 'block';
+            setTimeout(() => { flash.style.display = 'none'; }, 80);
+        }
         function createExplosion(position, count, color) {
             for (let i = 0; i < count; i++) {
                 const p = particlePool.get();
@@ -983,133 +1048,256 @@
                 p.mesh.material.color.set(color);
             }
         }
+        function initFloatingScorePool() {
+            const container = document.getElementById('ui-overlay');
+            for (let i = 0; i < 15; i++) {
+                const el = document.createElement('div');
+                el.className = 'floating-score';
+                el.style.display = 'none';
+                container.appendChild(el);
+                floatingScorePool.push({ el: el, active: false });
+            }
+        }
+        function spawnFloatingScore(text, position3D, color = "#fff") {
+            const poolEntry = floatingScorePool.find(p => !p.active);
+            if (!poolEntry) return;
+
+            const el = poolEntry.el;
+            const vector = position3D.clone().project(camera);
+            const x = (vector.x * 0.5 + 0.5) * window.innerWidth;
+            const y = (vector.y * -0.5 + 0.5) * window.innerHeight;
+
+            el.textContent = text;
+            el.style.color = color; // Pour 1-UP, etc.
+            el.style.left = `${x}px`;
+            el.style.top = `${y}px`;
+            el.style.display = 'block';
+            el.style.opacity = 1;
+            el.style.transform = 'translateY(0)';
+            poolEntry.active = true;
+
+            setTimeout(() => {
+                el.style.opacity = 0;
+                el.style.transform = 'translateY(-30px)';
+            }, 100); 
+
+            setTimeout(() => {
+                el.style.display = 'none';
+                poolEntry.active = false;
+            }, 1100); 
+        }
 
         // =====================================================================
-        // 5. SYSTÈMES (Logique de la boucle de jeu) (CDC Section 3.3)
+        // 5. SYSTÈMES (Logique de la boucle de jeu)
         // =====================================================================
 
-        // --- 5.1 PlayerSystem / InputSystem ---
+        // --- 5.1 PlayerSystem (Features 1, 3, 4, 8) ---
         function updatePlayer(dt) {
             if (!player || !player.active) return;
 
+            // Feature 4: Animation d'Entrée
+            if (player.isEntering) {
+                player.mesh.position.y = THREE.MathUtils.lerp(player.mesh.position.y, player.targetEnterY, 0.05);
+                if (Math.abs(player.mesh.position.y - player.targetEnterY) < 0.01) {
+                    player.isEntering = false;
+                    player.mesh.position.y = player.targetEnterY;
+                }
+                // Activer le propulseur pendant l'entrée
+                player.thrusterTimer -= dt;
+                if (player.thrusterTimer <= 0) {
+                    spawnPlayerThruster();
+                    player.thrusterTimer = 0.05;
+                }
+                return; // Bloque les autres actions
+            }
+
             const speed = 7;
             let currentMoveX = 0;
+            let dashDirection = 0; 
 
-            if (input.left) {
-                player.mesh.position.x -= speed * dt;
-                currentMoveX = -1;
+            player.dashCooldown -= dt; 
+            player.fireCooldown -= dt;
+            player.sideFireCooldown -= dt; // Feature 3
+            player.powerUpTimer -= dt;
+            player.invincibleTimer -= dt; 
+            player.thrusterTimer -= dt; 
+
+            if (player.thrusterTimer <= 0) {
+                spawnPlayerThruster();
+                player.thrusterTimer = 0.05; 
             }
-            if (input.right) {
-                player.mesh.position.x += speed * dt;
-                currentMoveX = 1;
+
+            if (player.powerUpTimer <= 0 && gameTimeScale < 1.0) {
+                gameTimeScale = 1.0;
+                player.powerUpState = 'none';
             }
+
+            // Feature 8: Tremblement Dash
+            if (input.dash && player.dashCooldown <= 0) {
+                player.isDashing = true;
+                player.dashCooldown = 1.0; 
+                audioEngine.playSound('dash', player.audioNode);
+                triggerScreenshake(0.15, 0.2); // Feature 8
+                
+                if (input.left) dashDirection = -1;
+                else if (input.right) dashDirection = 1;
+                else dashDirection = 0;
+                
+                player.mesh.position.x += 5 * dashDirection; 
+                createExplosion(player.mesh.position, 20, 0xaaaaff);
+                player.targetRotationZ = -Math.PI * 1.5 * dashDirection;
+            }
+            
+            if (!player.isDashing) {
+                if (input.left) { player.mesh.position.x -= speed * dt; currentMoveX = -1; }
+                if (input.right) { player.mesh.position.x += speed * dt; currentMoveX = 1; }
+                player.targetRotationZ = 0;
+            } else {
+                player.isDashing = false; 
+            }
+            
             input.currentMoveX = currentMoveX;
-
             const halfWidth = gameSize.width / 2;
             player.mesh.position.x = Math.max(-halfWidth, Math.min(halfWidth, player.mesh.position.x));
 
-            if (player.audioNode && audioContext) {
-                player.audioNode.positionX.setValueAtTime(player.mesh.position.x, audioContext.currentTime);
+            if (player.audioNode && audioContext) player.audioNode.positionX.setValueAtTime(player.mesh.position.x, audioContext.currentTime);
+
+            if (player.powerUpTimer <= 0) {
+                player.powerUpState = 'none';
+                player.fireRate = player.baseFireRate;
             }
 
-            if (player.powerUpTimer > 0) {
-                player.powerUpTimer -= dt;
-                if (player.powerUpTimer <= 0) {
-                    player.powerUpState = 'none';
-                    player.fireRate = player.baseFireRate;
-                }
-            }
+            if (player.invincibleTimer > 0) player.mesh.visible = Math.floor(player.invincibleTimer * 10) % 2 === 0;
+            else player.mesh.visible = true;
 
             player.shield.mesh.visible = player.shield.active;
-            if(player.shield.active) {
-                player.shield.mesh.rotation.y += dt * 0.5;
+            if(player.shield.active) player.shield.mesh.rotation.y += dt * 0.5;
+
+            // Logique de Tir (Features 1, 3, 5)
+            /* Feature 1 (SUPPRIMÉ): const chargeBar = document.getElementById('charge-bar'); */
+            if (input.fire) {
+                player.chargeTimer += dt;
+                // Feature 1 (SUPPRIMÉ): Mettre à jour la barre
+                /* Feature 1 (SUPPRIMÉ): chargeBar.style.width = `${Math.min(100, (player.chargeTimer / 1.0) * 100)}%`; */
+
+                if (player.fireCooldown <= 0 && player.chargeTimer < 0.2) { 
+                    if (player.powerUpState === 'spread_shot') {
+                        spawnPlayerBullet(0, 15, 0); spawnPlayerBullet(-5, 14, 0); spawnPlayerBullet(5, 14, 0);
+                    } else {
+                        spawnPlayerBullet(0, 15, 0);
+                    }
+                    audioEngine.playSound('shoot', player.audioNode);
+                    player.fireCooldown = player.fireRate;
+                }
+            } else if (!input.fire && player.chargeTimer > 0) {
+                if (player.chargeTimer > 1.0) { 
+                    spawnPlayerBullet(0, 20, 0, 'charged');
+                    player.fireCooldown = 1.0; 
+                }
+                player.chargeTimer = 0;
+                /* Feature 1 (SUPPRIMÉ): chargeBar.style.width = '0%'; */
             }
 
-            player.fireCooldown -= dt;
-            if (input.fire && player.fireCooldown <= 0) {
-                player.fireCooldown = player.fireRate;
-                
-                switch (player.powerUpState) {
-                    case 'spread_shot':
-                        spawnPlayerBullet(0, 15, 0); 
-                        spawnPlayerBullet(-5, 14, 0); 
-                        spawnPlayerBullet(5, 14, 0);  
-                        break;
-                    
-                    case 'rapid_fire':
-                    case 'none':
-                    default:
-                        spawnPlayerBullet(0, 15, 0);
-                        break;
-                }
-                
-                audioEngine.playSound('shoot', player.audioNode);
+            // Feature 3: Tirs Latéraux
+            if (player.powerUpState === 'side_shot' && player.sideFireCooldown <= 0) {
+                spawnPlayerBullet(-15, 0, 0); // Tir gauche
+                spawnPlayerBullet(15, 0, 0); // Tir droit
+                player.sideFireCooldown = player.baseFireRate * 2; // Plus lent que le tir principal
             }
+
+            player.targetRotationY = -input.currentMoveX * 0.1; 
+            player.currentRotationY = THREE.MathUtils.lerp(player.currentRotationY, player.targetRotationY, 0.1);
+            player.mesh.rotation.y = player.currentRotationY;
+            player.currentRotationZ = THREE.MathUtils.lerp(player.currentRotationZ, player.targetRotationZ, 0.1);
+            player.mesh.rotation.z = player.currentRotationZ;
         }
 
-        // Fonction utilitaire pour le tir
-        function spawnPlayerBullet(velX, velY, velZ) {
+        function spawnPlayerThruster() {
+            const p = particlePool.get();
+            p.mesh.position.copy(player.mesh.position).y -= 0.7; 
+            p.velocity.set((Math.random() - 0.5) * 0.5, -5, 0); 
+            p.mesh.material.color.set(0x00aaff);
+            p.lifetime = 0.2 + Math.random() * 0.1;
+            p.baseSize = 0.05;
+        }
+
+        function spawnPlayerBullet(velX, velY, velZ, type = 'normal') {
             const bullet = bulletPool.get();
             bullet.isPlayerBullet = true;
             bullet.mesh.material = playerBulletMaterial;
             bullet.mesh.position.copy(player.mesh.position).y += 0.5;
             bullet.velocity.set(velX, velY, velZ); 
             
-            // CORRECTION: Assigner la lumière ICI
-            bullet.light = playerLightPool.pop() || new THREE.PointLight(0x00ff00, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
-            bullet.light.intensity = 5; // AUGMENTÉ
-            bullet.light.visible = true;
+            const lightIntensity = (type === 'charged') ? 10 : 5;
+            bullet.light = playerLightPool.pop() || new THREE.PointLight(0x00ff00, lightIntensity, 4); 
+            bullet.light.intensity = lightIntensity; bullet.light.visible = true;
             bullet.mesh.add(bullet.light);
+
+            if (type === 'charged') {
+                bullet.isCharged = true;
+                bullet.mesh.scale.set(1.5, 2, 1.5); bullet.damage = 3; 
+                audioEngine.playSound('charge_shot', player.audioNode);
+            } else {
+                bullet.isCharged = false; bullet.mesh.scale.set(1, 1, 1); bullet.damage = 1;
+            }
         }
 
-        // --- 5.2 AlienAISystem (CDC Section 6.1 / 5.2) ---
+        // --- 5.2 AlienAISystem (Features 2, 9) ---
         function updateAliens(dt) {
             if (alienGrid.aliens.length === 0 || boss) return;
-
             let hitEdge = false;
             const halfWidth = gameSize.width / 2;
+            const kamikazeSpeed = 6 * gameTimeScale; // Feature 2
 
             for (const alien of alienGrid.aliens) {
                 if (!alien.active) continue;
+
+                // Feature 9: Rotation du bouclier
+                if (alien.shieldMesh) alien.shieldMesh.rotation.y += dt;
+
+                // Feature 2: Logique Kamikaze
+                if (alien.isKamikaze) {
+                    const direction = new THREE.Vector3().subVectors(player.mesh.position, alien.mesh.position).normalize();
+                    alien.mesh.position.add(direction.multiplyScalar(kamikazeSpeed * dt));
+                    // Collision avec le joueur (gérée dans updateCollisions)
+                    if (alien.mesh.position.y < -gameSize.height / 2 - 2) {
+                        alien.active = false; // Désactiver s'il sort
+                        scene.remove(alien.mesh);
+                    }
+                    continue; // Saute la logique de grille
+                }
                 
                 let moveY = 0;
-                if (alienGrid.moveDown) {
-                    moveY = -1.0; 
-                }
+                if (alienGrid.moveDown) moveY = -1.0; 
                 alien.mesh.position.x += alienGrid.direction * alienGrid.speed * dt;
                 alien.mesh.position.y += moveY;
                 
-                if (alien.audioNode && audioContext) {
-                    alien.audioNode.positionX.setValueAtTime(alien.mesh.position.x, audioContext.currentTime);
-                }
+                if (alien.audioNode && audioContext) alien.audioNode.positionX.setValueAtTime(alien.mesh.position.x, audioContext.currentTime);
+                if (alien.mesh.position.x > halfWidth || alien.mesh.position.x < -halfWidth) hitEdge = true;
                 
-                if (alien.mesh.position.x > halfWidth || alien.mesh.position.x < -halfWidth) {
-                    hitEdge = true;
-                }
-                
+                // Tir
                 if (Math.random() < alienGrid.fireRate * dt) {
                      const bullet = bulletPool.get();
                      bullet.isPlayerBullet = false;
                      bullet.mesh.material = alienBulletMaterial;
                      bullet.mesh.position.copy(alien.mesh.position).y -= 0.5;
                      bullet.velocity.set(0, -5, 0);
+                     if (alien.health > 1) bullet.target = player;
                      
-                     // CORRECTION: Assigner la lumière ICI
-                     bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
-                     bullet.light.intensity = 5; // AUGMENTÉ
-                     bullet.light.visible = true;
+                     bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); 
+                     bullet.light.intensity = 5; bullet.light.visible = true;
                      bullet.mesh.add(bullet.light);
                 }
-                
-                if (alien.mesh.position.y < player.mesh.position.y) {
-                    setGameState(GAME_STATE.GAME_OVER);
+                if (alien.mesh.position.y < player.mesh.position.y) setGameState(GAME_STATE.GAME_OVER);
+
+                // Feature 2: Chance de devenir Kamikaze
+                if (!alien.isKamikaze && Math.random() < 0.00005 * gameTimeScale) { // MODIFIÉ: 0.0001 -> 0.00005
+                    alien.isKamikaze = true;
+                    alien.health = 1; // MODIFIÉ: Les kamikazes ont 1 PV
+                    alien.baseMaterial.emissive.set(0xff0000); // Devient rouge vif
                 }
             }
-
-            if (alienGrid.moveDown) {
-                alienGrid.moveDown = false;
-            }
-            
+            if (alienGrid.moveDown) alienGrid.moveDown = false;
             if (hitEdge) {
                 alienGrid.direction *= -1; 
                 alienGrid.moveDown = true;
@@ -1117,227 +1305,286 @@
             }
         }
         
-        // IA du Boss (CDC 6.3 / 6.1)
+        // Feature 5: Nouvelle attaque de Boss
         function updateBoss(dt) {
             if (!boss || !boss.active) return;
-            
             const state = boss.fsm.state;
             boss.fsm.timer -= dt;
-            
             switch(state) {
                 case 'ENTERING':
                     boss.mesh.position.y = THREE.MathUtils.lerp(boss.mesh.position.y, boss.fsm.targetY, 0.05);
-                    if (boss.fsm.timer <= 0) {
-                        boss.fsm.state = 'ATTACKING';
-                        boss.fsm.timer = 5.0; 
-                    }
+                    if (boss.fsm.timer <= 0) { boss.fsm.state = 'ATTACKING'; boss.fsm.timer = 5.0; }
                     break;
-                    
                 case 'ATTACKING':
-                    // Le matériau émissif devient plus intense
-                    boss.baseMaterial.emissive.set(0x880000); // Rouge vif
+                    boss.baseMaterial.emissive.set(0x880000); 
                     boss.fireCooldown -= dt;
                     if (boss.fireCooldown <= 0) {
                         const positions = [-2, 0, 2];
                         for (const xOffset of positions) {
-                            const bullet = bulletPool.get();
-                            bullet.isPlayerBullet = false;
+                            const bullet = bulletPool.get(); bullet.isPlayerBullet = false;
                             bullet.mesh.material = alienBulletMaterial;
                             bullet.mesh.position.copy(boss.mesh.position).y -= 1.0;
                             bullet.mesh.position.x += xOffset;
                             bullet.velocity.set(0, -8, 0); 
-                            
-                            // CORRECTION: Assigner la lumière ICI
-                            bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
-                            bullet.light.intensity = 5; // AUGMENTÉ
-                            bullet.light.visible = true;
+                            bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); 
+                            bullet.light.intensity = 5; bullet.light.visible = true;
                             bullet.mesh.add(bullet.light);
                         }
                         boss.fireCooldown = 0.3; 
                     }
-                    
-                    if (boss.fsm.timer <= 0) {
-                        boss.fsm.state = 'VULNERABLE';
+                    if (boss.fsm.timer <= 0) { 
+                        // Chance d'entrer en mode BARRAGE
+                        if (Math.random() < 0.4) {
+                            boss.fsm.state = 'BARRAGE';
+                            boss.fsm.timer = 0.05; // Timer court pour le tir rapide
+                            boss.fsm.barrageCount = 20; // 20 tirs
+                        } else {
+                            boss.fsm.state = 'VULNERABLE'; 
+                            boss.fsm.timer = 3.0; 
+                        }
+                    }
+                    break;
+                // Feature 5: État Barrage
+                case 'BARRAGE':
+                    boss.baseMaterial.emissive.set(0xff8800); // Émissif orange
+                    if (boss.fsm.timer <= 0 && boss.fsm.barrageCount > 0) {
+                        const xOffset = (Math.random() - 0.5) * 6; // Tir aléatoire
+                        const bullet = bulletPool.get(); bullet.isPlayerBullet = false;
+                        bullet.mesh.material = alienBulletMaterial;
+                        bullet.mesh.position.copy(boss.mesh.position).y -= 1.0;
+                        bullet.mesh.position.x += xOffset;
+                        bullet.velocity.set(0, -10, 0); // Tirs rapides
+                        bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); 
+                        bullet.light.intensity = 5; bullet.light.visible = true;
+                        bullet.mesh.add(bullet.light);
+                        
+                        boss.fsm.timer = 0.05; // Prochain tir
+                        boss.fsm.barrageCount--;
+                    }
+                    if (boss.fsm.barrageCount <= 0) {
+                        boss.fsm.state = 'VULNERABLE'; 
                         boss.fsm.timer = 3.0; 
                     }
                     break;
-                    
                 case 'VULNERABLE':
-                    // Le matériau émissif s'éteint
-                    boss.baseMaterial.emissive.set(0x330000); // Rouge sombre
-                    
-                    if (boss.fsm.timer <= 0) {
-                        boss.fsm.state = 'ATTACKING';
-                        boss.fsm.timer = 5.0; 
-                    }
+                    boss.baseMaterial.emissive.set(0x330000); 
+                    if (boss.fsm.timer <= 0) { boss.fsm.state = 'ATTACKING'; boss.fsm.timer = 5.0; }
                     break;
             }
-            
             boss.mesh.position.x = Math.sin(clock.getElapsedTime() * 0.5) * (gameSize.width / 2 - 3);
         }
-
-        // Logique UFO (CDC 5.3)
         function updateUFO(dt) {
             ufoSpawnTimer -= dt;
-            if (ufoSpawnTimer <= 0 && !ufo) {
-                createUFO();
-                ufoSpawnTimer = 15.0 + Math.random() * 10; 
-            }
-            
+            if (ufoSpawnTimer <= 0 && !ufo) { createUFO(); ufoSpawnTimer = 15.0 + Math.random() * 10; }
             if (ufo && ufo.active) {
                 ufo.mesh.position.x += ufo.velocity.x * dt;
                 ufo.mesh.rotation.y += dt * 2;
-                
-                if (ufo.mesh.position.x > gameSize.width / 2 + 2) {
-                    scene.remove(ufo.mesh);
-                    ufo.active = false; // AJOUT: Doit être désactivé
-                    ufo = null;
+                ufo.fireCooldown -= dt;
+                if (ufo.fireCooldown <= 0) {
+                     const bullet = bulletPool.get(); bullet.isPlayerBullet = false;
+                     bullet.mesh.material = alienBulletMaterial;
+                     bullet.mesh.position.copy(ufo.mesh.position).y -= 0.5;
+                     bullet.velocity.set(0, -3, 0); 
+                     bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); 
+                     bullet.light.intensity = 5; bullet.light.visible = true;
+                     bullet.mesh.add(bullet.light);
+                     ufo.fireCooldown = 1.5 + Math.random() * 1.5;
                 }
+                if (ufo.mesh.position.x > gameSize.width / 2 + 2) { scene.remove(ufo.mesh); ufo.active = false; ufo = null; }
             }
         }
         
-        // --- 5.3 MovementSystem / TimerSystem (CDC Section 3.3) ---
+        // --- 5.3 MovementSystem (Feature 10) ---
         function updateMovementAndLifetime(dt) {
             const activeBullets = bulletPool.getActiveObjects();
             const activeParticles = particlePool.getActiveObjects();
             const activePowerUps = powerUpPool.getActiveObjects();
-            
-            const entitiesToUpdate = [...activeBullets, ...activeParticles, ...activePowerUps];
+            const activeDebris = debrisPool.getActiveObjects(); // Feature 10
+            const entitiesToUpdate = [...activeBullets, ...activeParticles, ...activePowerUps, ...activeDebris];
             
             for (const entity of entitiesToUpdate) {
+                if (entity.type === 'bullet' && entity.target && entity.target.active) {
+                    const targetPos = entity.target.mesh.position;
+                    const direction = new THREE.Vector3().subVectors(targetPos, entity.mesh.position).normalize();
+                    const targetVelocity = direction.multiplyScalar(5); 
+                    entity.velocity.lerp(targetVelocity, 0.05);
+                }
+
                 entity.mesh.position.x += entity.velocity.x * dt;
                 entity.mesh.position.y += entity.velocity.y * dt;
                 entity.mesh.position.z += entity.velocity.z * dt;
 
-                if (entity.audioNode && audioContext) {
-                    entity.audioNode.positionX.setValueAtTime(entity.mesh.position.x, audioContext.currentTime);
-                }
+                if (entity.audioNode && audioContext) entity.audioNode.positionX.setValueAtTime(entity.mesh.position.x, audioContext.currentTime);
 
                 entity.lifetime -= dt;
                 if (entity.lifetime <= 0) {
                     if (entity.type === 'bullet') bulletPool.release(entity);
                     if (entity.type === 'particle') particlePool.release(entity);
                     if (entity.type === 'powerup') powerUpPool.release(entity);
+                    if (entity.type === 'debris') debrisPool.release(entity); // Feature 10
                 }
+                if (entity.type === 'particle') entity.mesh.material.opacity = entity.lifetime * 2;
+                if (entity.type === 'powerup') { entity.mesh.rotation.x += dt; entity.mesh.rotation.y += dt; }
                 
-                if (entity.type === 'particle') {
-                    entity.mesh.material.opacity = entity.lifetime * 2; // Fade out
-                }
-                
-                // AJOUT: Rotation des power-ups
-                if (entity.type === 'powerup') {
-                    entity.mesh.rotation.x += dt;
-                    entity.mesh.rotation.y += dt;
+                // Feature 10: Rotation des débris
+                if (entity.type === 'debris') {
+                    entity.mesh.rotation.x += entity.rotationSpeed.x * dt;
+                    entity.mesh.rotation.y += entity.rotationSpeed.y * dt;
+                    entity.mesh.rotation.z += entity.rotationSpeed.z * dt;
                 }
             }
         }
 
-        // --- 5.4 CollisionSystem (CDC Section 4.2) ---
+        // Feature 10: Apparition des débris
+        function updateDebris(dt) {
+            if (debrisPool.getActiveObjects().length < 15 && Math.random() < 0.1 * dt) {
+                debrisPool.get(); // Fait spawner via la fonction reset
+            }
+        }
+        
+        function updateShields(dt) {
+            for (const shield of shields) {
+                if (shield.health < 10 && shield.health > 0) { 
+                    if (shield.regenTimer > 0) {
+                        shield.regenTimer -= dt;
+                    } else {
+                        shield.health++;
+                        shield.mesh.material.opacity = (shield.health / 10) * 0.6; 
+                        shield.regenTimer = 1.0; 
+                    }
+                }
+            }
+        }
+        function updateCombo(dt) {
+            if (combo.timer > 0) {
+                combo.timer -= dt;
+            } else if (combo.counter > 0) {
+                combo.counter = 0; 
+                updateHUD(); // Pour cacher le compteur
+            }
+        }
+
+
+        // --- 5.4 CollisionSystem (Features 2, 4, 7, 9) ---
         function updateCollisions() {
             const activeBullets = bulletPool.getActiveObjects();
             const activePowerUps = powerUpPool.getActiveObjects();
-            
-            if (!player || !player.active) return; // Ne pas vérifier les collisions si le joueur est mort
+            if (!player || !player.active || player.isEntering) return; // Feature 4
             
             player.collider.setFromObject(player.mesh);
-            
             for (const entity of [...alienGrid.aliens, ...activeBullets, ...shields, ...activePowerUps]) {
                 if (!entity || !entity.active) continue;
                 entity.collider.setFromObject(entity.mesh);
             }
-            if (ufo && ufo.active) {
-                ufo.collider.setFromObject(ufo.mesh);
-            }
-            if (boss && boss.active) {
-                boss.collider.setFromObject(boss.mesh);
-            }
+            if (ufo && ufo.active) ufo.collider.setFromObject(ufo.mesh);
+            if (boss && boss.active) boss.collider.setFromObject(boss.mesh);
 
             // 1. Tirs Joueur vs ...
             for (const bullet of activeBullets) {
                 if (!bullet.isPlayerBullet || !bullet.active) continue;
+                let bulletDestroyed = false; // Pour les tirs chargés
 
                 // ... vs Aliens
                 for (const alien of alienGrid.aliens) {
-                    if (!alien.active) continue;
-                    
+                    if (!alien.active || bulletDestroyed) continue;
                     if (bullet.collider.intersectsBox(alien.collider)) {
-                        bulletPool.release(bullet);
-                        alien.health--;
+                        
+                        // Feature 9: Gérer le bouclier alien
+                        if (alien.hasShield) {
+                            alien.hasShield = false;
+                            alien.mesh.remove(alien.shieldMesh);
+                            alien.shieldMesh = null;
+                            if (!bullet.isCharged) {
+                                bulletPool.release(bullet);
+                                bulletDestroyed = true;
+                            }
+                            audioEngine.playSound('shield_down');
+                            continue; // Ne pas blesser l'alien ce tour-ci
+                        }
+
+                        if (!bullet.isCharged) {
+                            bulletPool.release(bullet);
+                            bulletDestroyed = true;
+                        }
+                        alien.health -= bullet.damage; 
                         
                         alien.mesh.material.color.set(0xffffff);
-                        setTimeout(() => {
-                            if (alien.mesh) alien.mesh.material = alien.baseMaterial;
-                        }, 50);
+                        setTimeout(() => { if (alien.mesh) alien.mesh.material = alien.baseMaterial; }, 50);
 
                         if (alien.health <= 0) {
-                            alien.active = false;
-                            scene.remove(alien.mesh);
+                            alien.active = false; scene.remove(alien.mesh);
                             audioEngine.playSound('explosion', alien.audioNode);
                             triggerScreenshake(0.1, 0.2);
                             createExplosion(alien.mesh.position, 30, 0xff00ff);
-                            score += 100;
-                            updateHUD();
                             
-                            if (Math.random() < alienGrid.dropChance) {
-                                spawnPowerUp(alien.mesh.position);
+                            combo.counter++; combo.timer = COMBO_TIME;
+                            const scoreGained = (100 + (combo.counter * 10));
+                            score += scoreGained;
+                            spawnFloatingScore(`+${scoreGained}`, alien.mesh.position);
+                            
+                            // Feature 7: Vie supplémentaire
+                            if (score >= gameSettings.scoreForNextLife) {
+                                lives++;
+                                gameSettings.scoreForNextLife += 10000;
+                                spawnFloatingScore("1-UP!", player.mesh.position, "var(--neon-green)");
+                                audioEngine.playSound('one_up');
                             }
+                            
+                            updateHUD();
+                            if (Math.random() < alienGrid.dropChance) spawnPowerUp(alien.mesh.position);
                         }
                     }
                 }
+                if (bulletDestroyed) continue; // Le tir a touché un alien, il ne peut pas toucher autre chose
                 
-                // ... vs Boucliers (CDC 6.5)
+                // ... vs Boucliers
                 for (const shield of shields) {
-                    if (!shield.active) continue;
+                    if (!shield.active || bulletDestroyed) continue;
                     if (bullet.collider.intersectsBox(shield.collider)) {
-                        bulletPool.release(bullet);
-                        shield.health--;
+                        if (!bullet.isCharged) { bulletPool.release(bullet); bulletDestroyed = true; }
+                        shield.health -= bullet.damage; 
+                        shield.regenTimer = 5.0; 
                         shield.mesh.material.opacity = (shield.health / 10) * 0.6; 
                         if (shield.health <= 0) {
-                            shield.active = false;
-                            scene.remove(shield.mesh);
+                            shield.active = false; scene.remove(shield.mesh);
                             createExplosion(shield.mesh.position, 20, 0x0088ff);
                         }
                     }
                 }
+                if (bulletDestroyed) continue;
                 
-                // ... vs UFO (CDC 5.3)
+                // ... vs UFO
                 if (ufo && ufo.active && bullet.collider.intersectsBox(ufo.collider)) {
-                    bulletPool.release(bullet);
-                    ufo.health--;
+                    if (!bullet.isCharged) { bulletPool.release(bullet); bulletDestroyed = true; }
+                    ufo.health -= bullet.damage; 
                     if (ufo.health <= 0) {
-                        ufo.active = false;
-                        scene.remove(ufo.mesh);
-                        ufo = null;
-                        score += 500; 
-                        updateHUD();
-                        triggerScreenshake(0.2, 0.3);
+                        ufo.active = false; scene.remove(ufo.mesh); ufo = null;
+                        const scoreGained = 500; score += scoreGained;
+                        spawnFloatingScore(`+${scoreGained}`, bullet.mesh.position); 
+                        updateHUD(); triggerScreenshake(0.2, 0.3);
                         createExplosion(bullet.mesh.position, 50, 0xff4444);
                     }
                 }
+                if (bulletDestroyed) continue;
                 
-                // ... vs Boss (CDC 6.3)
+                // ... vs Boss
                 if (boss && boss.active && bullet.collider.intersectsBox(boss.collider)) {
-                    bulletPool.release(bullet);
-                    boss.health--;
+                    if (!bullet.isCharged) { bulletPool.release(bullet); bulletDestroyed = true; }
+                    let damage = bullet.damage; 
+                    if (gameSettings.difficulty === 'easy') damage *= 1.2;
+                    if (gameSettings.difficulty === 'hard') damage *= 0.8;
+                    boss.health -= damage;
                     updateHUD(); 
-                    
                     boss.baseMaterial.color.set(0xffffff);
-                    setTimeout(() => {
-                        if (boss.mesh) {
-                            boss.baseMaterial.color.set(0x880000); // Revient à la couleur de base
-                        }
-                    }, 50);
+                    setTimeout(() => { if (boss.mesh) boss.baseMaterial.color.set(0x880000); }, 50);
                     
                     if (boss.health <= 0) {
-                        boss.active = false;
-                        scene.remove(boss.mesh);
-                        boss = null;
-                        
-                        score += 1000; 
+                        boss.active = false; scene.remove(boss.mesh); boss = null;
+                        const scoreGained = 1000; score += scoreGained;
+                        spawnFloatingScore(`+${scoreGained}`, bullet.mesh.position); 
                         triggerScreenshake(0.5, 1.0);
                         createExplosion(bullet.mesh.position, 200, 0xff8800);
                         bossHealthBar.style.display = 'none';
-                        
                         advanceLevel();
                     }
                 }
@@ -1346,59 +1593,67 @@
             // 2. Tirs Aliens vs ...
             for (const bullet of activeBullets) {
                 if (bullet.isPlayerBullet || !bullet.active) continue;
-                
-                // CORRECTION: Ajout d'une vérification pour s'assurer que le joueur
-                // n'est pas mort pendant cette même boucle
                 if (!player.active) break; 
+                if (player.invincibleTimer > 0) continue;
 
-                // ... vs Bouclier Personnel (CDC 6.4)
                 if (player.shield.active && bullet.collider.intersectsBox(player.collider)) {
-                    bulletPool.release(bullet);
-                    player.shield.active = false; 
-                    triggerScreenshake(0.1, 0.2);
-                    createExplosion(player.mesh.position, 20, 0x00ffff);
+                    bulletPool.release(bullet); player.shield.active = false; 
+                    triggerScreenshake(0.1, 0.2); createExplosion(player.mesh.position, 20, 0x00ffff);
                     continue; 
                 }
-
-                // ... vs Joueur
                 if (bullet.collider.intersectsBox(player.collider)) {
-                    bulletPool.release(bullet);
-                    lives--;
-                    updateHUD();
-                    triggerScreenshake(0.3, 0.5);
+                    bulletPool.release(bullet); lives--; updateHUD();
+                    triggerScreenshake(0.3, 0.5); triggerHitFlash(); 
                     createExplosion(player.mesh.position, 50, 0x00ffff);
                     audioEngine.playSound('hit', player.audioNode);
-                    
                     if (lives <= 0) {
-                        player.active = false;
-                        scene.remove(player.mesh);
-                        setGameState(GAME_STATE.GAME_OVER);
-                        break; // CORRECTION: Sortir de la boucle, le joueur est mort
+                        player.active = false; scene.remove(player.mesh);
+                        setGameState(GAME_STATE.GAME_OVER); break; 
                     }
                 }
-                
-                // ... vs Boucliers (CDC 6.5)
                 for (const shield of shields) {
                     if (!shield.active) continue;
                     if (bullet.collider.intersectsBox(shield.collider)) {
-                        bulletPool.release(bullet);
-                        shield.health--;
+                        bulletPool.release(bullet); shield.health--; shield.regenTimer = 5.0; 
                         shield.mesh.material.opacity = (shield.health / 10) * 0.6;
                         if (shield.health <= 0) {
-                            shield.active = false;
-                            scene.remove(shield.mesh);
+                            shield.active = false; scene.remove(shield.mesh);
                             createExplosion(shield.mesh.position, 20, 0x0088ff);
                         }
                     }
                 }
             }
             
-            // 3. Joueur vs Power-Ups (CDC 6.4)
+            // 3. Joueur vs Power-Ups
             if (player.active) {
                 for (const powerUp of activePowerUps) {
                     if (powerUp.active && player.collider.intersectsBox(powerUp.collider)) {
                         powerUpPool.release(powerUp);
                         activatePowerUp(powerUp.powerUpType);
+                        audioEngine.playSound('powerup');
+                    }
+                }
+            }
+            
+            // Feature 2: Collision Alien Kamikaze vs Joueur
+            for (const alien of alienGrid.aliens) {
+                if (alien.isKamikaze && alien.active && player.collider.intersectsBox(alien.collider)) {
+                    alien.active = false; scene.remove(alien.mesh);
+                    if (player.invincibleTimer > 0) continue; // Invincible
+                    
+                    if (player.shield.active) {
+                        player.shield.active = false;
+                        triggerScreenshake(0.1, 0.2);
+                        createExplosion(player.mesh.position, 20, 0x00ffff);
+                    } else {
+                        lives--; updateHUD();
+                        triggerScreenshake(0.5, 0.5); triggerHitFlash();
+                        audioEngine.playSound('hit', player.audioNode);
+                    }
+                    createExplosion(alien.mesh.position, 50, 0xff0000); // Grosse explosion
+                    if (lives <= 0) {
+                        player.active = false; scene.remove(player.mesh);
+                        setGameState(GAME_STATE.GAME_OVER); break;
                     }
                 }
             }
@@ -1409,71 +1664,75 @@
             }
         }
         
-        // Système de gestion de niveaux
         function advanceLevel() {
             currentLevel++;
-            
-            if (currentLevel > 15) {
-                currentLevel = 1; 
-            }
-
-            if (currentLevel % 3 === 0) {
-                createBoss(); 
-            } else {
-                createAlienGrid();
-            }
-
-            updateHUD(); 
+            const msg = document.getElementById('level-complete-message');
+            msg.style.display = 'flex';
+            setTimeout(() => { msg.style.display = 'none'; }, 2000); 
+            setTimeout(() => {
+                if (currentGameState !== GAME_STATE.PLAYING) return; 
+                if (currentLevel > 15) currentLevel = 1; 
+                if (currentLevel % 3 === 0) { createBoss(); } 
+                else { createAlienGrid(); }
+                updateHUD(); 
+            }, 1000); 
         }
         
-        // Logique Power-Up (CDC 6.4)
+        // Feature 3: Tirs Latéraux
         function spawnPowerUp(position) {
             const p = powerUpPool.get();
             p.mesh.position.copy(position);
         }
-        
         function activatePowerUp(type) {
             player.powerUpState = type;
             player.powerUpTimer = 5.0; 
             
-            if (type === 'rapid_fire') {
-                player.fireRate = player.baseFireRate / 2; 
-            } else if (type === 'spread_shot') {
-                player.fireRate = player.baseFireRate; 
-            } else if (type === 'shield') {
-                player.shield.active = true;
-            }
+            if (type === 'rapid_fire') player.fireRate = player.baseFireRate / 2; 
+            else if (type === 'spread_shot') player.fireRate = player.baseFireRate; 
+            else if (type === 'shield') player.shield.active = true;
+            else if (type === 'invincible') player.invincibleTimer = 5.0;
+            else if (type === 'slowmo') gameTimeScale = 0.5; 
+            else if (type === 'side_shot') player.sideFireCooldown = 0; // Feature 3
         }
         
-        // --- 5.5 RenderSystem (CDC Section 3.3 / 7.1) ---
+        // --- 5.5 RenderSystem ---
         function updateRender(dt) {
             
-            // Animation subtile du vaisseau joueur
-            if (player && player.active) {
-                player.targetRotationY = -input.currentMoveX * 0.1; 
-                player.currentRotationY = THREE.MathUtils.lerp(player.currentRotationY, player.targetRotationY, 0.1);
-                player.mesh.rotation.y = player.currentRotationY;
+            // Mise à jour des starfields
+            starfield.mesh.position.y += dt * starfield.speed; 
+            if (starfield.mesh.position.y > starfield.range / 2) starfield.mesh.position.y = -starfield.range / 2;
+            starfield2.mesh.position.y += dt * starfield2.speed; 
+            if (starfield2.mesh.position.y > starfield2.range / 2) starfield2.mesh.position.y = -starfield2.range / 2;
+            starfieldFar.mesh.position.y += dt * starfieldFar.speed; 
+            if (starfieldFar.mesh.position.y > starfieldFar.range / 2) starfieldFar.mesh.position.y = -starfieldFar.range / 2;
 
-                player.targetRotationX = Math.sin(clock.getElapsedTime() * 2) * 0.05; 
-                player.currentRotationX = THREE.MathUtils.lerp(player.currentRotationX, player.targetRotationX, 0.05);
-                // Note: La rotation X de base pour l'orientation du modèle est gérée dans createPlayer
-            }
+            // Mise à jour des nébuleuses
+            nebula.mesh.position.y += dt * nebula.speed;
+            if (nebula.mesh.position.y > nebula.range / 2) nebula.mesh.position.y = -nebula.range / 2;
+            nebula2.mesh.position.y += dt * nebula2.speed;
+            if (nebula2.mesh.position.y > nebula2.range / 2) nebula2.mesh.position.y = -nebula2.range / 2;
 
-            // Mouvement du Starfield (Parallaxe)
-            if (starfield) {
-                starfield.position.y += dt * 0.2; 
-                if (starfield.position.y > 50) starfield.position.y = -50;
-            }
-            if (starfield2) {
-                starfield2.position.y += dt * 0.1; // Plus lent
-                if (starfield2.position.y > 50) starfield2.position.y = -50;
-            }
-            if (nebula) {
-                nebula.position.y += dt * 0.05; // Très lent
-                if (nebula.position.y > 50) nebula.position.y = -50;
+            // Mise à jour des planètes
+            for (const planet of planets) {
+                planet.mesh.position.y -= dt * planet.speed;
+                planet.mesh.rotation.x += planet.rotationSpeed.x * dt;
+                planet.mesh.rotation.y += planet.rotationSpeed.y * dt;
+                planet.mesh.rotation.z += planet.rotationSpeed.z * dt;
+                if (planet.mesh.position.y < -gameSize.height * 2) { // Repositionner quand elle sort de l'écran
+                    planet.mesh.position.y = gameSize.height * 2;
+                    planet.mesh.position.x = (Math.random() - 0.5) * gameSize.width * 5;
+                    planet.mesh.position.z = -40 - Math.random() * 60;
+                }
             }
             
-            // Rotation des aliens 
+            // Mise à jour des particules de poussière
+            if (dustParticles) {
+                dustParticles.position.y -= dt * 0.5; // Légère descente
+                if (dustParticles.position.y < -gameSize.height) {
+                    dustParticles.position.y = gameSize.height;
+                }
+            }
+
             for (const alien of alienGrid.aliens) {
                 if (alien.active && alien.mesh) {
                     alien.mesh.rotation.x += dt;
@@ -1481,27 +1740,22 @@
                 }
             }
             
-            // Gestion du Screenshake (Section 7.1)
-            // Appliqué au compositeur (caméra de passe) pour de meilleurs résultats
-            const passCamera = composer.passes[0].camera; // C'est la caméra de RenderPass
-            
+            const passCamera = composer.passes[0].camera; 
             if (shake.duration > 0) {
                 shake.duration -= dt;
                 const s = shake.intensity;
                 passCamera.position.x = Math.random() * s - s / 2;
+                passCamera.position.y = Math.random() * s - s / 2; // Ajout d'un tremblement vertical
                 passCamera.position.z = 10 + Math.random() * s - s / 2;
                 passCamera.rotation.z = Math.random() * (s/5) - (s/10);
             } else {
                 passCamera.position.x = 0;
+                passCamera.position.y = 0;
                 passCamera.position.z = 10;
                 passCamera.rotation.z = 0;
             }
             
-            // AJOUT: Mise à jour du FilmPass (pour l'animation)
             filmPass.uniforms.time.value += dt;
-
-            // MODIFIÉ: Rendu via le compositeur
-            // renderer.render(scene, camera);
             composer.render(dt);
         }
 
@@ -1518,120 +1772,109 @@
             await audioEngine.init();
             
             scene = new THREE.Scene();
-            // Fond bleu nuit très sombre
             scene.background = new THREE.Color(0x000010); 
-            
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
             camera.position.z = 10; 
-            
-            renderer = new THREE.WebGLRenderer({ 
-                canvas: document.getElementById('game-canvas') 
-                // antialias: false, // L'antialiasing est mieux géré par le post-traitement (FXAA/SMAA)
-            });
+            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas') });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            renderer.shadowMap.enabled = true; // Ombres (désactivées car coûteuses)
+            renderer.shadowMap.enabled = true; 
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-            renderer.setPixelRatio(window.devicePixelRatio); // Meilleure qualité
-            renderer.toneMapping = THREE.ACESFilmicToneMapping; // AJOUT: Essentiel pour le bloom !
-            
+            renderer.setPixelRatio(window.devicePixelRatio); 
+            renderer.toneMapping = THREE.ACESFilmicToneMapping; 
             clock = new THREE.Clock();
 
-            // --- Lumières (Améliorées) ---
-            const ambientLight = new THREE.AmbientLight(0x404080, 2); // Ambiance bleutée
-            scene.add(ambientLight);
-            
-            // Lumière principale (soleil lointain)
-            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
-            directionalLight.position.set(5, 10, 7.5);
-            // directionalLight.castShadow = true; // Ombres désactivées pour la performance
-            scene.add(directionalLight);
-            
-            // Lumière d'ambiance globale
-            const hemiLight = new THREE.HemisphereLight(0x00bfff, 0x002244, 1); // Ciel cyan, sol bleu foncé
-            scene.add(hemiLight);
-            
-            
-            // --- Post-Traitement (Bloom) ---
-            composer = new EffectComposer(renderer);
-            const renderPass = new RenderPass(scene, camera);
-            composer.addPass(renderPass);
-            
-            // Effet Bloom !
-            bloomPass = new UnrealBloomPass(
-                new THREE.Vector2(window.innerWidth, window.innerHeight),
-                1.0, // strength
-                0.4, // radius
-                0.9  // threshold (CORRIGÉ: 0.1 était trop bas, 0.9 ne cible que les objets très lumineux)
-            );
-            composer.addPass(bloomPass);
-            
-            // Effet Film (Vignette, Scanlines)
-            filmPass = new FilmPass(
-                0.35, // noise intensity
-                0.2,  // scanline intensity
-                648,  // scanline count
-                false // grayscale
-            );
-            composer.addPass(filmPass);
+            // Lumières
+            const ambientLight = new THREE.AmbientLight(0x404080, 2); scene.add(ambientLight);
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1); directionalLight.position.set(5, 10, 7.5); scene.add(directionalLight);
+            const hemiLight = new THREE.HemisphereLight(0x00bfff, 0x002244, 1); scene.add(hemiLight);
+            const gridHelper = new THREE.GridHelper(100, 50, 0x00ffff, 0x004444); 
+            gridHelper.position.y = -20; scene.add(gridHelper);
 
+            // Post-Traitement (Bloom)
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera); composer.addPass(renderPass);
+            bloomPass = new UnrealBloomPass( new THREE.Vector2(window.innerWidth, window.innerHeight), 1.0, 0.4, 0.9 ); composer.addPass(bloomPass);
+            filmPass = new FilmPass(0.35, 0.2, 648, false); composer.addPass(filmPass);
 
             document.getElementById('loading-text').innerText = 'CHARGEMENT TERMINÉ.';
             
-            // Arrière-plan (Parallaxe)
-            starfield = createStarfield(5000, 0.1, -50);
-            starfield2 = createStarfield(2000, 0.05, -30);
-            createNebula();
-            
+            // Arrière-plan amélioré
+            starfield = createStarfield(8000, 0.15, -50, 0.2); // Plus d'étoiles, plus grandes
+            starfield2 = createStarfield(4000, 0.08, -30, 0.1, 0xddddff); // Un peu plus bleues, taille moyenne
+            starfieldFar = createStarfield(1000, 0.04, -80, 0.05, 0xaaaaaa, 200); // Lointaines, petites, grises, lentes
+
+            nebula = createNebulaLayer(2000, 7, -60, [0xaa00ff, 0x00aaff, 0xff00aa], 0.07); // Densité, taille, couleur
+            nebula2 = createNebulaLayer(1000, 4, -40, [0x00ff00, 0xffff00], 0.04, 30, 15, 0.08); // Deuxième couche
+
+            createPlanets(3); // Ajout de 3 planètes lointaines
+            dustParticles = createDustParticles(500); // Ajout de particules de poussière
+
             // Pools
             bulletPool = new ObjectPool(createBulletEntity, resetBullet, 100);
             particlePool = new ObjectPool(createParticleEntity, resetParticle, 200);
             powerUpPool = new ObjectPool(createPowerUpEntity, resetPowerUp, 20); 
+            debrisPool = new ObjectPool(createDebrisEntity, resetDebris, 30); // Feature 10
+            initFloatingScorePool();
 
             // Gestionnaires d'événements
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
             
-            document.getElementById('start-button').addEventListener('click', () => {
-                setGameState(GAME_STATE.PLAYING);
+            // Boutons UI
+            document.getElementById('start-button').addEventListener('click', () => setGameState(GAME_STATE.PLAYING));
+            document.getElementById('restart-button').addEventListener('click', () => setGameState(GAME_STATE.MAIN_MENU));
+            document.getElementById('resume-button').addEventListener('click', () => setGameState(GAME_STATE.PLAYING));
+            document.getElementById('quit-button').addEventListener('click', () => setGameState(GAME_STATE.MAIN_MENU));
+            document.getElementById('difficulty-easy').addEventListener('click', () => setDifficulty('easy'));
+            document.getElementById('difficulty-medium').addEventListener('click', () => setDifficulty('medium'));
+            document.getElementById('difficulty-hard').addEventListener('click', () => setDifficulty('hard'));
+            updateDifficultyButtons(); 
+            document.getElementById('submit-score-button').addEventListener('click', () => {
+                const name = document.getElementById('player-name').value || 'PILOT';
+                saveScoreToLeaderboard(name, score);
+                loadLeaderboard(); 
+                document.getElementById('score-submission').style.display = 'none';
+                document.getElementById('restart-button').style.display = 'block';
             });
-            document.getElementById('restart-button').addEventListener('click', () => {
-                setGameState(GAME_STATE.MAIN_MENU); // Retour au menu pour recharger
-            });
-            document.getElementById('resume-button').addEventListener('click', () => {
-                setGameState(GAME_STATE.PLAYING);
-            });
-
+            
             // Démarrer la FSM
             setGameState(GAME_STATE.MAIN_MENU);
-            
-            // Démarrer la boucle de jeu 
             renderer.setAnimationLoop(gameLoop);
         }
 
-        // --- 6.2 Changement d'état (FSM) (Section 9.2) ---
+        // --- 6.2 Changement d'état (FSM) ---
         function setGameState(newState) {
             if (currentGameState === newState) return;
 
-            // Logique de bascule pour la Pause
+            // Feature 1 (SUPPRIMÉ): Gérer la barre de charge
+            /* Feature 1 (SUPPRIMÉ): const chargeBar = document.getElementById('charge-bar-container'); */
+
             if (newState === GAME_STATE.PLAYING && currentGameState === GAME_STATE.PAUSED) {
                 document.getElementById('pause-menu').style.display = 'none';
+                document.getElementById('hud').style.display = 'flex';
+                /* Feature 1 (SUPPRIMÉ): chargeBar.style.display = 'flex'; */
                 currentGameState = newState;
                 return; 
             }
             if (newState === GAME_STATE.PAUSED && currentGameState === GAME_STATE.PLAYING) {
                 document.getElementById('pause-menu').style.display = 'flex';
+                document.getElementById('hud').style.display = 'none';
+                /* Feature 1 (SUPPRIMÉ): chargeBar.style.display = 'none'; */
                 currentGameState = newState;
                 return; 
             }
-
+            
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('pause-menu').style.display = 'none'; 
+            document.getElementById('level-complete-message').style.display = 'none';
+            /* Feature 1 (SUPPRIMÉ): chargeBar.style.display = 'none'; */
+            
             currentGameState = newState;
-
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-over-screen').style.display = 'none';
             document.getElementById('loading-screen').style.display = 'none';
-            document.getElementById('hud').style.display = 'none';
-            document.getElementById('pause-menu').style.display = 'none'; 
+
 
             switch (newState) {
                 case GAME_STATE.PRELOADING:
@@ -1640,61 +1883,72 @@
                 case GAME_STATE.MAIN_MENU:
                     document.getElementById('main-menu').style.display = 'flex';
                     loadLeaderboard();
-                    resetGame(); // Réinitialise le jeu à chaque retour au menu
+                    resetGame(); 
                     break;
                 case GAME_STATE.PLAYING:
-                    if (audioContext && audioContext.state === 'suspended') {
-                        audioContext.resume();
-                    }
-                    // Le jeu est déjà réinitialisé depuis MAIN_MENU
+                    if (audioContext && audioContext.state === 'suspended') audioContext.resume();
                     document.getElementById('hud').style.display = 'flex';
+                    /* Feature 1 (SUPPRIMÉ): chargeBar.style.display = 'flex'; */
                     break;
                 case GAME_STATE.GAME_OVER:
                     document.getElementById('final-score').innerText = `SCORE : ${score}`;
                     document.getElementById('game-over-screen').style.display = 'flex';
-                    saveScoreToLeaderboard();
+                    checkAndShowScoreSubmission(); 
                     bossHealthBar.style.display = 'none'; 
                     break;
             }
         }
         
-        // Panneau des scores (CDC 9.6)
+        // --- 6.3 Panneau des scores ---
+        function getLeaderboard() {
+            return JSON.parse(localStorage.getItem('eliteInvaders_leaderboard_v2')) || [];
+        }
         function loadLeaderboard() {
-            const scores = JSON.parse(localStorage.getItem('eliteInvaders_leaderboard')) || [];
+            const scores = getLeaderboard();
             const list = document.getElementById('high-score-list');
             list.innerHTML = ''; 
-            
             if (scores.length === 0) {
-                list.innerHTML = '<li>AUCUN SCORE</li>';
-                return;
+                list.innerHTML = '<li>AUCUN SCORE</li>'; return;
             }
-            
-            const topScores = scores.slice(0, 5); 
-            
-            for (const s of topScores) {
+            for (const s of scores) {
                 const li = document.createElement('li');
-                li.textContent = s;
+                li.textContent = `${s.name} - ${s.score}`;
                 list.appendChild(li);
             }
         }
-
-        // Panneau des scores (CDC 9.6)
-        function saveScoreToLeaderboard() {
-            const scores = JSON.parse(localStorage.getItem('eliteInvaders_leaderboard')) || [];
-            scores.push(score);
-            scores.sort((a, b) => b - a); 
-            
+        function saveScoreToLeaderboard(name, newScore) {
+            const scores = getLeaderboard();
+            scores.push({ name: name.toUpperCase(), score: newScore });
+            scores.sort((a, b) => b.score - a.score); 
             const topScores = scores.slice(0, 5);
-            
-            localStorage.setItem('eliteInvaders_leaderboard', JSON.stringify(topScores));
+            localStorage.setItem('eliteInvaders_leaderboard_v2', JSON.stringify(topScores));
         }
-
-        // --- 6.3 Réinitialisation du jeu ---
+        function checkAndShowScoreSubmission() {
+            const scores = getLeaderboard();
+            const isHighScore = scores.length < 5 || score > scores[scores.length - 1].score;
+            if (isHighScore && score > 0) { 
+                document.getElementById('score-submission').style.display = 'block';
+                document.getElementById('player-name').focus();
+                document.getElementById('restart-button').style.display = 'none';
+            } else {
+                document.getElementById('score-submission').style.display = 'none';
+                document.getElementById('restart-button').style.display = 'block';
+            }
+        }
+        
+        // --- 6.4 Contrôles ---
+        function setDifficulty(diff) {
+            gameSettings.difficulty = diff;
+            updateDifficultyButtons();
+        }
+        function updateDifficultyButtons() {
+            document.querySelectorAll('.difficulty-controls button').forEach(btn => btn.classList.remove('selected'));
+            document.getElementById(`difficulty-${gameSettings.difficulty}`).classList.add('selected');
+        }
+        
+        // --- 6.5 Réinitialisation du jeu (Features 7, 10) ---
         function resetGame() {
-            // Nettoie les entités
-            entities.forEach(e => {
-                if (e.mesh) scene.remove(e.mesh);
-            });
+            entities.forEach(e => { if (e.mesh) scene.remove(e.mesh); });
             entities = [];
             alienGrid.aliens = [];
             shields = []; 
@@ -1702,46 +1956,48 @@
             bulletPool.getActiveObjects().forEach(b => bulletPool.release(b));
             particlePool.getActiveObjects().forEach(p => particlePool.release(p));
             powerUpPool.getActiveObjects().forEach(p => powerUpPool.release(p));
+            debrisPool.getActiveObjects().forEach(d => debrisPool.release(d)); // Feature 10
             
-            if (ufo) {
-                scene.remove(ufo.mesh);
-                ufo = null;
-            }
+            if (ufo) { scene.remove(ufo.mesh); ufo = null; }
             ufoSpawnTimer = 15.0;
-            
-            if (boss) {
-                scene.remove(boss.mesh);
-                boss = null;
-            }
+            if (boss) { scene.remove(boss.mesh); boss = null; }
             bossHealthBar.style.display = 'none';
             
-            // Recrée le joueur, les aliens et les boucliers
+            // Feature 10: Recréer les débris
+            for (let i = 0; i < 15; i++) { debrisPool.get(); }
+
             createPlayer();
             createAlienGrid();
             createShields();
             
-            // Réinitialise les stats
             score = 0;
-            lives = 55; // MODIFIÉ: 3 -> 55
+            switch(gameSettings.difficulty) {
+                case 'easy': lives = 55; break; // MODIFIÉ: 5 -> 55
+                case 'hard': lives = 55; break; // MODIFIÉ: 2 -> 55
+                default: lives = 55; break; // MODIFIÉ: 3 -> 55
+            }
             currentLevel = 1; 
-            alienGrid.speed = alienGrid.baseSpeed; 
             alienGrid.direction = 1;
+            gameTimeScale = 1.0; 
+            combo.counter = 0; combo.timer = 0; 
+            gameSettings.scoreForNextLife = 10000; // Feature 7
             updateHUD();
         }
 
-        // --- 6.4 Boucle de Jeu Principale ---
+        // --- 6.6 Boucle de Jeu Principale ---
         function gameLoop() {
-            deltaTime = clock.getDelta();
+            const rawDeltaTime = clock.getDelta();
+            deltaTime = rawDeltaTime * gameTimeScale; 
 
             if (currentGameState === GAME_STATE.PLAYING) {
                 updatePlayer(deltaTime);
-                if (boss) {
-                    updateBoss(deltaTime);
-                } else {
-                    updateAliens(deltaTime);
-                }
+                if (boss) { updateBoss(deltaTime); } 
+                else { updateAliens(deltaTime); }
                 updateUFO(deltaTime); 
                 updateMovementAndLifetime(deltaTime);
+                updateDebris(rawDeltaTime); // Feature 10 (utilise le temps réel, pas le temps ralenti)
+                updateShields(deltaTime); 
+                updateCombo(deltaTime); 
                 updateCollisions();
             }
             
@@ -1750,67 +2006,61 @@
             }
         }
 
-        // --- 6.5 Gestionnaires d'événements (Input) ---
+        // --- 6.7 Gestionnaires d'événements (Input) ---
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
-            // AJOUT: Mettre à jour le compositeur
             composer.setSize(window.innerWidth, window.innerHeight);
         }
-
         function onKeyDown(event) {
             switch (event.code) {
-                case 'ArrowLeft':
-                case 'KeyA':
-                    input.left = true;
-                    break;
-                case 'ArrowRight':
-                case 'KeyD': 
-                    input.right = true; 
-                    break; 
-                case 'Space': 
-                case 'ArrowUp': 
-                case 'KeyW':
-                    input.fire = true;
-                    break;
-                case 'Escape':
-                    if (currentGameState === GAME_STATE.PLAYING) {
-                        setGameState(GAME_STATE.PAUSED);
-                    } else if (currentGameState === GAME_STATE.PAUSED) {
-                        setGameState(GAME_STATE.PLAYING);
+                case 'ArrowLeft': case 'KeyA': input.left = true; break;
+                case 'ArrowRight': case 'KeyD': input.right = true; break; 
+                case 'Space': case 'ArrowUp': case 'KeyW': 
+                    input.fire = true; 
+                    if (!player.isCharging) {
+                        player.isCharging = true;
+                        player.chargeTimer = 0;
                     }
+                    break;
+                case 'ShiftLeft': case 'KeyX': input.dash = true; break;
+                case 'Escape': case 'KeyP':
+                    if (currentGameState === GAME_STATE.PLAYING) setGameState(GAME_STATE.PAUSED);
+                    else if (currentGameState === GAME_STATE.PAUSED) setGameState(GAME_STATE.PLAYING);
                     break;
             }
         }
-
         function onKeyUp(event) {
             switch (event.code) {
-                case 'ArrowLeft':
-                case 'KeyA':
-                    input.left = false;
+                case 'ArrowLeft': case 'KeyA': input.left = false; break;
+                case 'ArrowRight': case 'KeyD': input.right = false; break;
+                case 'Space': case 'ArrowUp': case 'KeyW': 
+                    input.fire = false; 
+                    player.isCharging = false; 
                     break;
-                case 'ArrowRight':
-                case 'KeyD':
-                    input.right = false;
-                    break;
-                case 'Space':
-                case 'ArrowUp':
-                case 'KeyW':
-                    input.fire = false;
-                    break;
+                case 'ShiftLeft': case 'KeyX': input.dash = false; break;
             }
         }
         
-        // --- 6.6 UI (HUD) ---
+        // --- 6.8 UI (HUD) (Feature 6) ---
         function updateHUD() {
             document.getElementById('score').innerText = `SCORE : ${score}`;
             document.getElementById('lives').innerText = `VIES : ${lives}`;
             document.getElementById('level').innerText = `NIVEAU : ${currentLevel}`; 
             
             if (boss && boss.active) {
-                const healthPercent = (boss.health / boss.maxHealth) * 100;
+                const healthPercent = Math.max(0, (boss.health / boss.maxHealth) * 100);
                 bossHealthElement.style.width = `${healthPercent}%`;
+            }
+
+            // Feature 6: Mettre à jour le compteur de combo
+            const comboEl = document.getElementById('combo-meter');
+            if (combo.counter > 2) {
+                comboEl.innerText = `COMBO ${combo.counter}x`;
+                comboEl.style.display = 'block';
+            } else {
+                comboEl.style.display = 'none';
             }
         }
 
@@ -1820,10 +2070,6 @@
     </script>
 </body>
 </html>
-
-
-
-
 
 
 
