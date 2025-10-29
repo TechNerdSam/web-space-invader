@@ -4,16 +4,24 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Elite Invaders 3D</title>
+    <!-- Importation de la police Sci-Fi "Orbitron" -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+    
     <!-- 
       Conformément au CDC (Section 9.1), nous utilisons une superposition HTML/CSS 
       pour l'interface utilisateur (UI) par-dessus le canvas du jeu.
-    --><style>
+    -->
+    <style>
         body {
-            font-family: 'Arial', sans-serif;
+            /* Utilisation de la nouvelle police */
+            font-family: 'Orbitron', 'Arial', sans-serif;
             margin: 0;
             padding: 0;
-            background-color: #000;
-            color: #fff;
+            /* Nouveau fond radial pour la profondeur */
+            background: radial-gradient(ellipse at center, #1a2a40 0%, #000010 100%);
+            color: #00ffff; /* Nouvelle couleur de base "Cyan Neon" */
             overflow: hidden; /* Empêche le défilement */
         }
 
@@ -24,7 +32,7 @@
             height: 100vh;
         }
 
-        /* Le canvas de rendu 3D (remplace la pile multi-canvas 2D) */
+        /* Le canvas de rendu 3D */
         #game-canvas {
             position: absolute;
             top: 0;
@@ -32,7 +40,6 @@
             width: 100%;
             height: 100%;
             z-index: 1;
-            /* L'équivalent de image-rendering: pixelated pour la 3D est géré par le renderer */
         }
 
         /* Superposition de l'UI (Section 9.1) */
@@ -47,41 +54,62 @@
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            /* Par défaut, l'UI ne capture pas les clics (sauf les menus) */
             pointer-events: none; 
         }
 
         /* Menus qui doivent être cliquables */
         .menu {
-            background-color: rgba(0, 0, 0, 0.8);
-            border: 2px solid #0f0;
+            /* Effet "Verre Dépoli" moderne */
+            background-color: rgba(0, 20, 30, 0.75);
+            backdrop-filter: blur(5px);
+            border: 2px solid #00ffff;
             border-radius: 10px;
             padding: 40px;
             text-align: center;
             pointer-events: auto; /* Réactive les événements pour ce menu */
-            box-shadow: 0 0 20px #0f0;
+            /* Ombre "Neon Glow" */
+            box-shadow: 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+            animation: pulse-glow 2s infinite alternate;
+        }
+        
+        @keyframes pulse-glow {
+            from {
+                box-shadow: 0 0 20px #00ffff, inset 0 0 10px #00ffff;
+            }
+            to {
+                box-shadow: 0 0 35px #00ffff, inset 0 0 15px #00ffff;
+            }
         }
 
         .menu h1 {
             margin-top: 0;
-            color: #0f0;
+            color: #ffffff;
             text-transform: uppercase;
             letter-spacing: 3px;
+            /* Effet "Neon Glow" pour le texte */
+            text-shadow: 0 0 5px #fff, 0 0 10px #fff, 0 0 20px #00ffff, 0 0 30px #00ffff;
+        }
+        
+        .menu p {
+            font-size: 1.2em;
+            text-shadow: 0 0 5px #00ffff;
         }
 
-        /* AJOUT: Style pour le panneau des scores */
+        /* Panneau des scores */
         #leaderboard {
             width: 80%;
             margin: 20px auto;
-            background: rgba(0, 255, 0, 0.05);
-            border: 1px solid #0f0;
+            background: rgba(0, 255, 255, 0.05);
+            border: 1px solid #00bfff;
             border-radius: 5px;
             padding: 10px;
+            box-shadow: inset 0 0 10px rgba(0, 191, 255, 0.5);
         }
         #leaderboard h2 {
             margin: 0 0 10px 0;
             font-size: 1.2em;
             color: #fff;
+            text-shadow: 0 0 10px #00bfff;
         }
         #high-score-list {
             list-style-type: decimal;
@@ -89,26 +117,33 @@
             margin: 0;
             text-align: left;
             font-size: 1.1em;
+            color: #00ffff;
         }
         #high-score-list li {
             margin-bottom: 5px;
+            text-shadow: 0 0 5px #00ffff;
         }
 
         .menu button {
-            background-color: #0f0;
-            color: #000;
-            border: none;
+            background-color: transparent;
+            color: #00ffff;
+            border: 2px solid #00ffff;
             padding: 15px 30px;
             font-size: 1.2em;
+            font-family: 'Orbitron', 'Arial', sans-serif;
             text-transform: uppercase;
             cursor: pointer;
             border-radius: 5px;
-            transition: background-color 0.3s, box-shadow 0.3s;
+            transition: background-color 0.3s, box-shadow 0.3s, color 0.3s;
+            text-shadow: 0 0 10px #00ffff;
+            box-shadow: 0 0 10px #00ffff;
         }
 
         .menu button:hover {
-            background-color: #fff;
-            box-shadow: 0 0 15px #fff;
+            background-color: #00ffff;
+            color: #000;
+            box-shadow: 0 0 25px #00ffff, 0 0 40px #fff;
+            text-shadow: none;
         }
 
         /* HUD en jeu (Section 9.1) */
@@ -120,12 +155,13 @@
             display: flex;
             justify-content: space-between;
             font-size: 1.5em;
-            color: #0f0;
-            text-shadow: 0 0 5px #0f0;
+            color: #00ffff;
+            /* Effet "Neon Glow" pour le HUD */
+            text-shadow: 0 0 5px #00ffff, 0 0 10px #00ffff;
             display: none; /* Caché par défaut */
         }
 
-        /* AJOUT: Barre de vie du Boss (CDC 9.3) */
+        /* Barre de vie du Boss (CDC 9.3) */
         #boss-health-bar {
             position: absolute;
             top: 80px; /* Sous le HUD principal */
@@ -133,10 +169,11 @@
             transform: translateX(-50%);
             width: 50%;
             height: 20px;
-            background-color: #333;
+            background-color: rgba(255, 0, 0, 0.1);
             border: 2px solid #f00;
             border-radius: 5px;
             display: none; /* Caché par défaut */
+            box-shadow: 0 0 15px #f00;
         }
         #boss-health {
             width: 100%;
@@ -144,6 +181,7 @@
             background-color: #f00;
             border-radius: 2px;
             transition: width 0.2s ease-out;
+            box-shadow: 0 0 10px #f00, 0 0 20px #f00;
         }
 
         /* Écrans de la FSM Globale (Section 9.2) */
@@ -161,17 +199,20 @@
       - game-container : Conteneur principal
       - game-canvas : Rendu 3D (Three.js)
       - ui-overlay : Superposition HTML pour l'UI
-    --><div id="game-container">
+    -->
+    <div id="game-container">
         <canvas id="game-canvas"></canvas>
         
         <div id="ui-overlay">
             
-            <!-- État PRELOADING (Section 9.4) --><div id="loading-screen" class="menu">
+            <!-- État PRELOADING (Section 9.4) -->
+            <div id="loading-screen" class="menu">
                 <h1>ELITE INVADERS 3D</h1>
-                <p id="loading-text">CHARGEMENT DES RESSOURCES...</p>
+                <p id="loading-text">CHARGEMENT DES SYSTÈMES...</p>
             </div>
 
-            <!-- État MAIN_MENU (Section 9.2) --><div id="main-menu" class="menu" style="display: none;">
+            <!-- État MAIN_MENU (Section 9.2) -->
+            <div id="main-menu" class="menu" style="display: none;">
                 <h1>ELITE INVADERS 3D</h1>
                 <!-- MODIFIÉ: Panneau des scores (CDC 9.6) -->
                 <div id="leaderboard">
@@ -185,18 +226,21 @@
                 <button id="start-button">COMMENCER LA MISSION</button>
             </div>
 
-            <!-- État GAME_OVER (Section 9.2) --><div id="game-over-screen" class="menu" style="display: none;">
+            <!-- État GAME_OVER (Section 9.2) -->
+            <div id="game-over-screen" class="menu" style="display: none;">
                 <h1>MISSION ÉCHOUÉE</h1>
                 <p id="final-score">SCORE : 0</p>
                 <button id="restart-button">RÉESSAYER</button>
             </div>
 
-            <!-- AJOUT: État PAUSED (CDC 9.2) --><div id="pause-menu" class="menu" style="display: none;">
+            <!-- AJOUT: État PAUSED (CDC 9.2) -->
+            <div id="pause-menu" class="menu" style="display: none;">
                 <h1>PAUSE</h1>
                 <button id="resume-button">REPRENDRE</button>
             </div>
 
-            <!-- HUD (Head-Up Display) (Section 9.1) --><div id="hud">
+            <!-- HUD (Head-Up Display) (Section 9.1) -->
+            <div id="hud">
                 <div id="score">SCORE : 0</div>
                 <!-- AJOUT: Affichage du niveau -->
                 <div id="level">NIVEAU : 1</div>
@@ -212,23 +256,39 @@
     </div>
 
     <!-- 
-      Importation de Three.js (bibliothèque de rendu 3D).
-      Le CDC spécifie "sans framework de jeu", mais Three.js est une
-      bibliothèque de rendu, nécessaire pour la 3D. L'architecture ECS 
-      sera la nôtre.
-    --><script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+      Importation de Three.js.
+      Nous utilisons un "importmap" pour gérer les modules JSM
+      nécessaires pour le post-traitement (Effet Bloom).
+    -->
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.128.0/examples/jsm/"
+        }
+    }
+    </script>
 
     <script type="module">
+    
+        // --- Imports 3D (y compris Post-Traitement) ---
+        import * as THREE from 'three';
+        import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
+        import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
+        import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
+        import { FilmPass } from 'three/addons/postprocessing/FilmPass.js';
+
         // =====================================================================
         // 1. FONDATIONS TECHNIQUES ET ARCHITECTURE (CDC Sections 2, 3)
         // =====================================================================
 
         // --- 1.1 Moteurs 3D (Three.js) ---
         let scene, camera, renderer, clock;
+        // AJOUT: Compositeur pour le post-traitement (Bloom)
+        let composer, bloomPass, filmPass;
         let gameSize = { width: 20, height: 20 }; // Taille de la zone de jeu en unités 3D
         
         // --- 1.2 Boucle de Jeu (Game Loop) (CDC Section 2.2) ---
-        // `rAF` est géré par le `renderer.setAnimationLoop` de Three.js
         let deltaTime = 0;
 
         // --- 1.3 FSM Globale (Gestionnaire d'état) (CDC Section 9.2) ---
@@ -242,21 +302,18 @@
         let currentGameState = GAME_STATE.PRELOADING;
 
         // --- 1.4 Architecture ECS (simplifiée) (CDC Section 3) ---
-        // Pour un seul fichier, une ECS formelle est lourde.
-        // Nous utilisons une approche à base de composants (objets)
-        // et de systèmes (fonctions) qui itèrent sur des listes.
-        let entities = []; // Remplace l'EntityManager
+        let entities = [];
         let player = null;
         let alienGrid = {
             aliens: [],
-            direction: 1, // 1 pour droite, -1 pour gauche
+            direction: 1, 
             speed: 0.5,
-            baseSpeed: 0.5, // Pour la difficulté progressive
+            baseSpeed: 0.5,
             moveDown: false,
-            fireRate: 0.02, // Chance de tirer par alien par frame
-            baseFireRate: 0.02, // Pour la difficulté progressive
-            dropChance: 0.2, // 20% de chance de lâcher un power-up
-            toughAlienChance: 0.2 // 20% de chance qu'un alien soit "renforcé"
+            fireRate: 0.02,
+            baseFireRate: 0.02,
+            dropChance: 0.2, 
+            toughAlienChance: 0.2 
         };
         
         // --- 1.5 Gestion des Entrées (InputSystem) (CDC Section 3.3) ---
@@ -264,26 +321,23 @@
             left: false,
             right: false,
             fire: false,
-            // AJOUT: Pour simuler des mouvements subtils du vaisseau
             currentMoveX: 0 
         };
 
         // --- 1.6 Statistiques de jeu ---
         let score = 0;
-        let lives = 3;
-        let currentLevel = 1; // AJOUT: Système de niveaux
+        let lives = 55; // MODIFIÉ: 3 -> 55
+        let currentLevel = 1; 
 
         // --- 1.7 Entités de jeu supplémentaires ---
         let shields = [];
         let ufo = null;
-        let ufoSpawnTimer = 15.0; // 15 secondes
-        let starfield; // Pour l'arrière-plan
-        let boss = null; // AJOUT: Variable pour le boss
-        let bossHealthBar, bossHealthElement; // AJOUT: Éléments DOM pour la vie du boss
+        let ufoSpawnTimer = 15.0; 
+        let starfield, starfield2; // AJOUT: 2e couche pour parallaxe
+        let nebula; // AJOUT: Nébuleuse
+        let boss = null; 
+        let bossHealthBar, bossHealthElement;
 
-        // =====================================================================
-        // 2. AUDIO (CDC Section 8)
-// ... (pas de changement dans cette section) ...
         // =====================================================================
         // 2. AUDIO (CDC Section 8)
         // =====================================================================
@@ -296,10 +350,9 @@
 
         class AudioEngine {
             async init() {
-                if (audioContext) return; // Déjà initialisé
+                if (audioContext) return; 
                 audioContext = new (window.AudioContext || window.webkitAudioContext)();
                 
-                // Création des nœuds de mixage (Section 8.1)
                 sfxGain = audioContext.createGain();
                 musicGain = audioContext.createGain();
                 
@@ -329,7 +382,6 @@
                 const source = audioContext.createBufferSource();
                 source.buffer = audioBuffers[name];
 
-                // Gestion de la spatialisation (Section 8.2)
                 if (spatialNode) {
                     source.connect(spatialNode);
                     spatialNode.connect(sfxGain);
@@ -341,19 +393,12 @@
             
             // Crée un nœud de spatialisation 3D (PannerNode)
             createSpatialNode() {
-                // Pour la 3D, PannerNode est plus complexe,
-                // On utilise un simple Gain pour cet exemple.
-                // Dans une version complète, on utiliserait PannerNode
-                // et on mettrait à jour sa position.
                 const panner = audioContext.createPanner();
                 panner.panningModel = 'HRTF';
                 panner.distanceModel = 'inverse';
                 panner.refDistance = 1;
                 panner.maxDistance = 100;
                 panner.rolloffFactor = 1;
-                panner.coneInnerAngle = 360;
-                panner.coneOuterAngle = 0;
-                panner.coneOuterGain = 0;
                 return panner;
             }
         }
@@ -363,33 +408,65 @@
         // 3. OPTIMISATION : OBJECT POOLING (CDC Section 4.1)
         // =====================================================================
         
-        // Géométrie et Matériaux partagés
-        // MODIFIÉ (CDC 7.2) : Remplacé Sphère par Cylindre pour des tirs "laser"
+        // --- Géométrie et Matériaux partagés (Refonte Visuelle) ---
+        
+        // Tirs (Lasers)
         const bulletGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.8, 8);
-        const playerBulletMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
-        const alienBulletMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+        // MATÉRIAUX ÉMISSIFS pour l'effet Bloom
+        const playerBulletMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x00ff00, 
+            emissive: 0x00ff00, // Brille
+            emissiveIntensity: 5 // AUGMENTÉ (de 2 à 5)
+        });
+        const alienBulletMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0xff0000, 
+            emissive: 0xff0000, // Brille
+            emissiveIntensity: 5 // AUGMENTÉ (de 2 à 5)
+        });
+        
+        // Particules
         const particleGeometry = new THREE.BufferGeometry();
         particleGeometry.setAttribute('position', new THREE.Float32BufferAttribute([0,0,0], 3));
         const particleMaterial = new THREE.PointsMaterial({ 
             color: 0xffaa00, 
             size: 0.1, 
             transparent: true,
-            blending: THREE.AdditiveBlending 
+            blending: THREE.AdditiveBlending,
+            depthWrite: false // Important pour le blending
         });
         
-        // Nouveaux matériaux pour les fonctionnalités
-        const shieldMaterial = new THREE.MeshLambertMaterial({ color: 0x0088ff, transparent: true, opacity: 0.8 });
-        const powerUpGeometry = new THREE.BoxGeometry(0.3, 0.3, 0.3);
-        const powerUpMatRapid = new THREE.MeshLambertMaterial({ color: 0xffff00 }); // Jaune pour Rapid
-        const powerUpMatSpread = new THREE.MeshLambertMaterial({ color: 0x00ffff }); // Cyan pour Spread
-        const powerUpMatShield = new THREE.MeshLambertMaterial({ color: 0x0088ff }); // AJOUT: Bleu pour Bouclier
-        const ufoGeometry = new THREE.SphereGeometry(0.6, 12, 6);
-        const ufoMaterial = new THREE.MeshLambertMaterial({ color: 0xff4444 });
+        // Boucliers (Nouveau design)
+        const shieldGeometry = new THREE.CylinderGeometry(0.2, 0.2, 2.5, 12);
+        shieldGeometry.rotateX(Math.PI / 2); // Pivoter horizontalement
+        const shieldMaterial = new THREE.MeshStandardMaterial({ 
+            color: 0x0088ff, 
+            transparent: true, 
+            opacity: 0.6,
+            metalness: 0.8,
+            roughness: 0.1,
+            emissive: 0x002288,
+            emissiveIntensity: 1
+        });
         
-        // Nouveaux matériaux pour les aliens
-        const alienMatNormal = new THREE.MeshLambertMaterial({ color: 0xff00ff }); // Magenta (normal)
-        const alienMatTough = new THREE.MeshLambertMaterial({ color: 0xff8800 }); // Orange (renforcé)
+        // Power-ups (Nouveau design "Cristal")
+        const powerUpGeometry = new THREE.TetrahedronGeometry(0.3);
+        const powerUpMatRapid = new THREE.MeshStandardMaterial({ color: 0xffff00, emissive: 0xffff00, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
+        const powerUpMatSpread = new THREE.MeshStandardMaterial({ color: 0x00ffff, emissive: 0x00ffff, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
+        const powerUpMatShield = new THREE.MeshStandardMaterial({ color: 0x0088ff, emissive: 0x0088ff, emissiveIntensity: 1, metalness: 0.5, roughness: 0.3 });
+        
+        // UFO (Nouveau design "Soucoupe")
+        const ufoGeometry = new THREE.TorusGeometry(0.6, 0.2, 8, 16);
+        ufoGeometry.rotateX(Math.PI / 2);
+        const ufoMaterial = new THREE.MeshStandardMaterial({ color: 0xff4444, emissive: 0xaa0000, metalness: 0.9, roughness: 0.2 });
+        
+        // Aliens (Nouveau design "Drone")
+        const alienGeometry = new THREE.IcosahedronGeometry(0.5, 0); // Cristal
+        const alienMatNormal = new THREE.MeshStandardMaterial({ color: 0xff00ff, emissive: 0x550055, metalness: 0.8, roughness: 0.3 });
+        const alienMatTough = new THREE.MeshStandardMaterial({ color: 0xff8800, emissive: 0x883300, metalness: 0.8, roughness: 0.3 });
 
+        // AJOUT: Lumières pour les tirs (pour le pooling)
+        const playerLightPool = [];
+        const alienLightPool = [];
 
         class ObjectPool {
             constructor(createFn, resetFn, initialSize = 50) {
@@ -403,7 +480,7 @@
                 for (let i = 0; i < size; i++) {
                     const obj = this.createFn();
                     obj.active = false;
-                    scene.add(obj.mesh); // Ajoute le mesh à la scène une fois
+                    scene.add(obj.mesh); 
                     this.pool.push(obj);
                 }
             }
@@ -411,7 +488,6 @@
             get() {
                 let obj = this.pool.find(o => !o.active);
                 if (!obj) {
-                    // Si le pool est vide, on l'agrandit (moins idéal que le pré-allocage)
                     this.expandPool(Math.floor(this.pool.length * 0.5));
                     obj = this.pool.find(o => !o.active);
                 }
@@ -425,7 +501,17 @@
             release(obj) {
                 obj.active = false;
                 obj.mesh.visible = false;
-                obj.mesh.position.set(0, -100, 0); // Déplace hors champ
+                obj.mesh.position.set(0, -100, 0);
+                
+                // CORRECTION: Logique de lumière déplacée vers resetBullet
+                // et les fonctions de spawn.
+                // Juste s'assurer de la retirer de la scène.
+                if (obj.light) {
+                    obj.light.visible = false;
+                    obj.mesh.remove(obj.light); 
+                    // Le pool correct (joueur/alien) sera géré
+                    // au prochain appel de resetBullet
+                }
             }
 
             getActiveObjects() {
@@ -443,9 +529,8 @@
         // --- 4.1 Fonctions de création (pour les pools) ---
 
         function createBulletEntity() {
-            const mesh = new THREE.Mesh(bulletGeometry); // Géométrie partagée
+            const mesh = new THREE.Mesh(bulletGeometry, playerBulletMaterial); // CORRECTION: Ajout d'un matériau par défaut
             const audioNode = audioEngine.createSpatialNode();
-            // mesh.add(audioNode); // Erreur: Un PannerNode (Web Audio) n'est pas un Object3D (Three.js)
             
             const entity = {
                 mesh: mesh,
@@ -453,9 +538,10 @@
                 type: 'bullet',
                 isPlayerBullet: true,
                 velocity: new THREE.Vector3(0, 5, 0),
-                lifetime: 2, // en secondes
+                lifetime: 2, 
                 collider: new THREE.Box3(),
-                audioNode: audioNode
+                audioNode: audioNode,
+                light: null // AJOUT: Pour la lumière dynamique
             };
             entities.push(entity);
             return entity;
@@ -470,7 +556,6 @@
                 velocity: new THREE.Vector3(),
                 lifetime: 0.5,
                 baseSize: 0.1
-                // Pas d'audioNode pour les particules
             };
             entities.push(entity);
             return entity;
@@ -478,15 +563,15 @@
 
         // Ajout : Power-Up (CDC 6.4)
         function createPowerUpEntity() {
-            const mesh = new THREE.Mesh(powerUpGeometry, powerUpMatRapid.clone()); // Matériau par défaut
+            const mesh = new THREE.Mesh(powerUpGeometry, powerUpMatRapid.clone()); 
             const entity = {
                 mesh: mesh,
                 active: false,
                 type: 'powerup',
-                velocity: new THREE.Vector3(0, -2, 0), // Tombe
-                lifetime: 10.0, // 10 secondes pour le ramasser
+                velocity: new THREE.Vector3(0, -2, 0), 
+                lifetime: 10.0, 
                 collider: new THREE.Box3(),
-                powerUpType: 'rapid_fire' // Type par défaut
+                powerUpType: 'rapid_fire' 
             };
             entities.push(entity);
             return entity;
@@ -496,8 +581,22 @@
 
         function resetBullet(bullet) {
             bullet.lifetime = 2;
-            // MODIFIÉ : Oriente le laser correctement
             bullet.mesh.rotation.x = Math.PI / 2;
+            
+            // CORRECTION: Retirer l'ancienne lumière. La nouvelle sera ajoutée par le spawner.
+            if (bullet.light) {
+                bullet.light.visible = false;
+                bullet.mesh.remove(bullet.light); 
+                
+                // Devine où la remettre en se basant sur la couleur
+                // (getHex() peut être lent, mais c'est plus robuste que le flag)
+                if (bullet.light.color.getHex() === 0x00ff00) { 
+                    playerLightPool.push(bullet.light);
+                } else {
+                    alienLightPool.push(bullet.light);
+                }
+                bullet.light = null;
+            }
         }
         
         function resetParticle(particle) {
@@ -516,7 +615,6 @@
             powerUp.lifetime = 10.0;
             powerUp.velocity.set(0, -2, 0);
             
-            // MODIFIÉ: Randomise le type de power-up (CDC 6.4)
             const rand = Math.random();
             if (rand < 0.4) {
                 powerUp.powerUpType = 'rapid_fire';
@@ -525,7 +623,6 @@
                 powerUp.powerUpType = 'spread_shot';
                 powerUp.mesh.material = powerUpMatSpread;
             } else {
-                // AJOUT: Nouveau power-up Bouclier
                 powerUp.powerUpType = 'shield';
                 powerUp.mesh.material = powerUpMatShield;
             }
@@ -539,12 +636,18 @@
         function createPlayer() {
             const playerGroup = new THREE.Group();
             
+            // Matériaux métalliques améliorés
             const darkGray = new THREE.MeshStandardMaterial({ color: 0x222222, metalness: 0.8, roughness: 0.2 });
             const lightGray = new THREE.MeshStandardMaterial({ color: 0x888888, metalness: 0.6, roughness: 0.4 });
-            const brightBlue = new THREE.MeshStandardMaterial({ color: 0x00aaff, emissive: 0x002244, emissiveIntensity: 0.5 });
-            const redGlass = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0.7, roughness: 0.2 });
+            // Matériau de réacteur émissif (pour le Bloom)
+            const brightBlue = new THREE.MeshStandardMaterial({ 
+                color: 0x00aaff, 
+                emissive: 0x00aaff, // Brille
+                emissiveIntensity: 3 
+            });
+            const redGlass = new THREE.MeshStandardMaterial({ color: 0xff0000, transparent: true, opacity: 0.7, roughness: 0.2, emissive: 0x330000 });
             
-            // Corps principal : forme de coin ou de diamant
+            // Corps principal 
             const bodyShape = new THREE.Shape();
             bodyShape.moveTo(0, 0.5);
             bodyShape.lineTo(0.8, 0);
@@ -554,28 +657,27 @@
             const bodyGeometry = new THREE.ExtrudeGeometry(bodyShape, { depth: 0.5, bevelEnabled: false });
             const body = new THREE.Mesh(bodyGeometry, darkGray);
             body.rotation.x = Math.PI / 2;
-            body.position.z = -0.25; // Centre la profondeur
+            body.position.z = -0.25;
             playerGroup.add(body);
 
-            // Cockpit bulbeux en verre
+            // Cockpit 
             const cockpitGeometry = new THREE.SphereGeometry(0.3, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2);
             const cockpit = new THREE.Mesh(cockpitGeometry, redGlass);
             cockpit.position.set(0, 0.2, 0.2);
             playerGroup.add(cockpit);
 
-            // Ailes latérales avec détail de réacteur/propulsion
+            // Ailes latérales
             const wingShape = new THREE.Shape();
             wingShape.moveTo(0, 0);
             wingShape.lineTo(1.5, 0.2);
             wingShape.lineTo(1.5, -0.2);
             wingShape.lineTo(0, -0.4);
             wingShape.lineTo(0, 0);
-            
             const wingGeometry = new THREE.ExtrudeGeometry(wingShape, { depth: 0.2, bevelEnabled: false });
             
             const leftWing = new THREE.Mesh(wingGeometry, lightGray);
             leftWing.position.set(-1.0, 0, 0);
-            leftWing.rotation.y = Math.PI; // Inverser pour l'aile gauche
+            leftWing.rotation.y = Math.PI; 
             playerGroup.add(leftWing);
 
             const rightWing = new THREE.Mesh(wingGeometry, lightGray);
@@ -603,21 +705,28 @@
             jet.rotation.x = Math.PI / 2;
             playerGroup.add(jet);
             
-            playerGroup.scale.set(1.2, 1.2, 1.2); // Agrandir légèrement le vaisseau
+            // AJOUT: Lumière du réacteur (pour le Bloom)
+            const jetLight = new THREE.PointLight(0x00aaff, 2, 5);
+            jetLight.position.set(0, -0.8, 0);
+            playerGroup.add(jetLight);
+            
+            playerGroup.scale.set(1.2, 1.2, 1.2); 
             playerGroup.position.y = -gameSize.height / 2 + 2;
             
             const audioNode = audioEngine.createSpatialNode();
             
-            // AJOUT: Bouclier personnel (CDC 6.4)
+            // Bouclier personnel (CDC 6.4) - Look amélioré
             const shieldGeometry = new THREE.SphereGeometry(1.2, 16, 16);
-            const shieldMaterial = new THREE.MeshBasicMaterial({ 
+            const shieldMaterial = new THREE.MeshStandardMaterial({ 
                 color: 0x00ffff, 
+                emissive: 0x00ffff,
+                emissiveIntensity: 1,
                 transparent: true, 
                 opacity: 0.3,
                 wireframe: true 
             });
             const playerShieldMesh = new THREE.Mesh(shieldGeometry, shieldMaterial);
-            playerShieldMesh.visible = false; // Caché par défaut
+            playerShieldMesh.visible = false; 
             playerGroup.add(playerShieldMesh);
 
             player = {
@@ -631,12 +740,11 @@
                 fireRate: 0.2,
                 powerUpState: 'none',
                 powerUpTimer: 0,
-                // AJOUT : Variables pour l'animation du vaisseau
                 targetRotationY: 0,
                 targetRotationX: 0,
                 currentRotationY: 0,
                 currentRotationX: 0,
-                shield: { // AJOUT: Gestion du bouclier (CDC 6.4)
+                shield: { 
                     active: false,
                     mesh: playerShieldMesh
                 }
@@ -646,17 +754,16 @@
         }
 
         function createAlien(x, y) {
-            // AJOUT : Alien renforcé (Nouveau type)
             const isTough = Math.random() < alienGrid.toughAlienChance;
             const alienHealth = isTough ? 2 : 1;
+            // Utilise le nouveau matériau
             const alienMaterial = isTough ? alienMatTough : alienMatNormal;
             
-            const geometry = new THREE.BoxGeometry(0.8, 0.8, 0.8);
-            const mesh = new THREE.Mesh(geometry, alienMaterial.clone());
+            // Utilise la nouvelle géométrie
+            const mesh = new THREE.Mesh(alienGeometry, alienMaterial.clone());
             mesh.position.set(x, y, 0);
             
             const audioNode = audioEngine.createSpatialNode();
-            // mesh.add(audioNode); // Erreur: Un PannerNode (Web Audio) n'est pas un ObjectD (Three.js)
 
             const alien = {
                 mesh: mesh,
@@ -665,61 +772,83 @@
                 collider: new THREE.Box3(),
                 audioNode: audioNode,
                 health: alienHealth,
-                baseMaterial: alienMaterial // Sauvegarde le matériau de base
+                baseMaterial: alienMaterial 
             };
             scene.add(mesh);
             entities.push(alien);
             alienGrid.aliens.push(alien);
         }
 
-        // AJOUT: Création du Boss (CDC 6.3)
+        // Création du Boss (CDC 6.3) - Design amélioré
         function createBoss() {
-            // Nettoie les aliens restants (si jamais)
             alienGrid.aliens.forEach(a => {
                 if (a.mesh) scene.remove(a.mesh);
                 a.active = false;
             });
             alienGrid.aliens = [];
             
-            const bossGeometry = new THREE.BoxGeometry(6, 2, 2);
-            const bossMaterial = new THREE.MeshLambertMaterial({ color: 0x880000 }); // Rouge sombre
-            const mesh = new THREE.Mesh(bossGeometry, bossMaterial);
+            // Groupe pour le boss
+            const bossGroup = new THREE.Group();
             
-            mesh.position.set(0, gameSize.height / 2 + 5, 0); // Commence hors écran (en haut)
+            // Matériau du boss (métallique, émissif)
+            const bossMaterial = new THREE.MeshStandardMaterial({ 
+                color: 0x880000, 
+                metalness: 0.9, 
+                roughness: 0.2,
+                emissive: 0x330000,
+                emissiveIntensity: 2
+            });
+            
+            // Corps central
+            const bodyGeo = new THREE.BoxGeometry(6, 2, 2);
+            const body = new THREE.Mesh(bodyGeo, bossMaterial);
+            bossGroup.add(body);
+            
+            // Canons latéraux
+            const canonGeo = new THREE.CylinderGeometry(0.5, 0.5, 2, 12);
+            const leftCanon = new THREE.Mesh(canonGeo, bossMaterial);
+            leftCanon.position.set(-3, 0, 0);
+            leftCanon.rotation.z = Math.PI / 2;
+            bossGroup.add(leftCanon);
+            
+            const rightCanon = new THREE.Mesh(canonGeo, bossMaterial);
+            rightCanon.position.set(3, 0, 0);
+            rightCanon.rotation.z = Math.PI / 2;
+            bossGroup.add(rightCanon);
+            
+            bossGroup.position.set(0, gameSize.height / 2 + 5, 0); // Commence hors écran
             
             const audioNode = audioEngine.createSpatialNode();
             
             boss = {
-                mesh: mesh,
+                mesh: bossGroup, // Utilise le groupe
                 active: true,
                 type: 'boss',
                 collider: new THREE.Box3(),
                 audioNode: audioNode,
-                maxHealth: 50 + (currentLevel * 10), // Difficulté progressive
+                maxHealth: 50 + (currentLevel * 10),
                 health: 50 + (currentLevel * 10),
                 baseMaterial: bossMaterial,
-                // FSM du Boss (CDC 6.1)
                 fsm: {
-                    state: 'ENTERING', // ENTERING, ATTACKING, VULNERABLE
-                    timer: 3.0, // Durée de l'état
-                    targetY: gameSize.height / 2 - 4 // Position de combat
+                    state: 'ENTERING', 
+                    timer: 3.0,
+                    targetY: gameSize.height / 2 - 4 
                 },
                 fireCooldown: 0.1
             };
-            scene.add(mesh);
+            scene.add(boss.mesh);
             entities.push(boss);
             
-            // Affiche la barre de vie
             bossHealthBar.style.display = 'block';
             updateHUD();
         }
 
-        // Ajout : Boucliers (CDC 6.5)
+        // Boucliers (CDC 6.5) - Nouveau design
         function createShields() {
-            const shieldGeometry = new THREE.BoxGeometry(2.5, 0.8, 1);
             const positions = [-6, -2, 2, 6]; // Positions X
             
             for (const x of positions) {
+                // Utilise la nouvelle géométrie (cylindre horizontal)
                 const mesh = new THREE.Mesh(shieldGeometry, shieldMaterial.clone());
                 mesh.position.set(x, -gameSize.height / 2 + 5, 0);
                 
@@ -728,7 +857,7 @@
                     active: true,
                     type: 'shield',
                     collider: new THREE.Box3(),
-                    health: 10 // 10 coups pour détruire
+                    health: 10 
                 };
                 scene.add(mesh);
                 shields.push(shield);
@@ -736,19 +865,20 @@
             }
         }
         
-        // Ajout : Vaisseau Mystère (UFO) (CDC 5.3)
+        // Vaisseau Mystère (UFO) (CDC 5.3) - Nouveau design
         function createUFO() {
-            if (ufo) return; // Un seul UFO à la fois
+            if (ufo) return; 
 
+            // Utilise la nouvelle géométrie (Torus)
             const mesh = new THREE.Mesh(ufoGeometry, ufoMaterial);
-            mesh.position.set(-gameSize.width / 2 - 2, gameSize.height / 2 - 1, 0); // Apparaît à gauche
+            mesh.position.set(-gameSize.width / 2 - 2, gameSize.height / 2 - 1, 0); 
             
             ufo = {
                 mesh: mesh,
                 active: true,
                 type: 'ufo',
                 collider: new THREE.Box3(),
-                velocity: new THREE.Vector3(3, 0, 0), // Se déplace vers la droite
+                velocity: new THREE.Vector3(3, 0, 0),
                 health: 1
             };
             scene.add(mesh);
@@ -756,13 +886,11 @@
         }
 
         function createAlienGrid() {
-            // AJOUT: Difficulté progressive (CDC Niveaux)
-            // Augmente la vitesse, la cadence de tir et la chance d'avoir des ennemis "tough"
             alienGrid.speed = alienGrid.baseSpeed + (currentLevel * 0.05);
             alienGrid.fireRate = Math.min(0.1, alienGrid.baseFireRate + (currentLevel * 0.002));
             alienGrid.toughAlienChance = Math.min(0.6, 0.2 + (currentLevel * 0.02));
 
-            const rows = Math.min(5, 3 + Math.floor(currentLevel / 3)); // Ajoute des rangées
+            const rows = Math.min(5, 3 + Math.floor(currentLevel / 3)); 
             const cols = 8;
             const startX = - (cols / 2) * 1.5 + 0.75;
             const startY = gameSize.height / 2 - 3;
@@ -773,15 +901,15 @@
             }
         }
         
-        // AJOUT (CDC 4.3) : Arrière-plan "Starfield"
-        function createStarfield() {
-            const starCount = 5000;
+        // AJOUT (CDC 4.3) : Arrière-plan "Starfield" (Amélioré)
+        function createStarfield(count = 5000, size = 0.1, zPos = -50) {
+            const starCount = count;
             const positions = new Float32Array(starCount * 3);
             
             for (let i = 0; i < starCount; i++) {
                 positions[i * 3    ] = (Math.random() - 0.5) * 100; // x
                 positions[i * 3 + 1] = (Math.random() - 0.5) * 100; // y
-                positions[i * 3 + 2] = (Math.random() - 0.5) * 100; // z
+                positions[i * 3 + 2] = (Math.random() - 0.5) * 50 + zPos; // z (profondeur)
             }
             
             const starGeometry = new THREE.BufferGeometry();
@@ -789,20 +917,62 @@
             
             const starMaterial = new THREE.PointsMaterial({
                 color: 0xffffff,
-                size: 0.1,
+                size: size,
                 transparent: true,
-                opacity: 0.8
+                opacity: 0.8,
+                depthWrite: false
             });
             
-            starfield = new THREE.Points(starGeometry, starMaterial);
-            scene.add(starfield);
+            const field = new THREE.Points(starGeometry, starMaterial);
+            scene.add(field);
+            return field;
+        }
+        
+        // AJOUT: Nébuleuse (simulée avec des points)
+        function createNebula() {
+            const nebulaCount = 1000;
+            const positions = new Float32Array(nebulaCount * 3);
+            const colors = new Float32Array(nebulaCount * 3);
+            const color = new THREE.Color();
+            
+            const nebulaColors = [new THREE.Color(0xaa00ff), new THREE.Color(0x00aaff), new THREE.Color(0xff00aa)];
+
+            for (let i = 0; i < nebulaCount; i++) {
+                // Position en "nuage"
+                positions[i * 3    ] = (Math.random() - 0.5) * 40; // x
+                positions[i * 3 + 1] = (Math.random() - 0.5) * 20 + 5; // y (centré haut)
+                positions[i * 3 + 2] = -60 - Math.random() * 20; // z (très loin)
+                
+                // Couleur aléatoire
+                const c = nebulaColors[Math.floor(Math.random() * nebulaColors.length)];
+                color.set(c);
+                colors[i * 3    ] = color.r;
+                colors[i * 3 + 1] = color.g;
+                colors[i * 3 + 2] = color.b;
+            }
+            
+            const nebulaGeometry = new THREE.BufferGeometry();
+            nebulaGeometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+            nebulaGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3));
+            
+            const nebulaMaterial = new THREE.PointsMaterial({
+                size: 5, // Grosses particules
+                transparent: true,
+                opacity: 0.05, // Très faible opacité
+                blending: THREE.AdditiveBlending,
+                depthWrite: false,
+                vertexColors: true // Utilise les couleurs définies
+            });
+            
+            nebula = new THREE.Points(nebulaGeometry, nebulaMaterial);
+            scene.add(nebula);
         }
         
         // --- 4.4 "Juiciness" : Screenshake (CDC Section 7.1) ---
         let shake = { intensity: 0, duration: 0 };
         function triggerScreenshake(intensity, duration) {
-            shake.intensity = intensity;
-            shake.duration = duration;
+            shake.intensity = Math.max(shake.intensity, intensity);
+            shake.duration = Math.max(shake.duration, duration);
         }
 
         // --- 4.5 "Juiciness" : Particules (CDC Section 7.3) ---
@@ -833,74 +1003,67 @@
                 player.mesh.position.x += speed * dt;
                 currentMoveX = 1;
             }
-            input.currentMoveX = currentMoveX; // Met à jour la direction de mouvement
+            input.currentMoveX = currentMoveX;
 
-            // Contraintes de l'écran
             const halfWidth = gameSize.width / 2;
             player.mesh.position.x = Math.max(-halfWidth, Math.min(halfWidth, player.mesh.position.x));
 
-            // Mise à jour de la spatialisation audio (Section 8.2)
             if (player.audioNode && audioContext) {
                 player.audioNode.positionX.setValueAtTime(player.mesh.position.x, audioContext.currentTime);
-                player.audioNode.positionY.setValueAtTime(player.mesh.position.y, audioContext.currentTime);
-                player.audioNode.positionZ.setValueAtTime(player.mesh.position.z, audioContext.currentTime);
             }
 
-            // AJOUT : Gestion du timer de Power-up (CDC 6.4)
             if (player.powerUpTimer > 0) {
                 player.powerUpTimer -= dt;
                 if (player.powerUpTimer <= 0) {
-                    // Fin du power-up
                     player.powerUpState = 'none';
                     player.fireRate = player.baseFireRate;
                 }
             }
 
-            // AJOUT: Gestion du bouclier (CDC 6.4)
             player.shield.mesh.visible = player.shield.active;
             if(player.shield.active) {
                 player.shield.mesh.rotation.y += dt * 0.5;
             }
 
-            // Système de tir (FireRateComponent)
             player.fireCooldown -= dt;
             if (input.fire && player.fireCooldown <= 0) {
                 player.fireCooldown = player.fireRate;
                 
-                // MODIFIÉ : Logique de tir (CDC 6.4)
                 switch (player.powerUpState) {
                     case 'spread_shot':
-                        // Tir en éventail
-                        spawnPlayerBullet(0, 15, 0); // Centre
-                        spawnPlayerBullet(-5, 14, 0); // Gauche
-                        spawnPlayerBullet(5, 14, 0);  // Droite
+                        spawnPlayerBullet(0, 15, 0); 
+                        spawnPlayerBullet(-5, 14, 0); 
+                        spawnPlayerBullet(5, 14, 0);  
                         break;
                     
                     case 'rapid_fire':
                     case 'none':
                     default:
-                        // Tir normal
                         spawnPlayerBullet(0, 15, 0);
                         break;
                 }
                 
-                // Audio (Section 8.2)
                 audioEngine.playSound('shoot', player.audioNode);
             }
         }
 
-        // AJOUT : Fonction utilitaire pour le tir
+        // Fonction utilitaire pour le tir
         function spawnPlayerBullet(velX, velY, velZ) {
             const bullet = bulletPool.get();
             bullet.isPlayerBullet = true;
             bullet.mesh.material = playerBulletMaterial;
             bullet.mesh.position.copy(player.mesh.position).y += 0.5;
-            bullet.velocity.set(velX, velY, velZ); // Vitesse des tirs joueur
+            bullet.velocity.set(velX, velY, velZ); 
+            
+            // CORRECTION: Assigner la lumière ICI
+            bullet.light = playerLightPool.pop() || new THREE.PointLight(0x00ff00, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
+            bullet.light.intensity = 5; // AUGMENTÉ
+            bullet.light.visible = true;
+            bullet.mesh.add(bullet.light);
         }
 
         // --- 5.2 AlienAISystem (CDC Section 6.1 / 5.2) ---
         function updateAliens(dt) {
-            // MODIFIÉ: L'IA des aliens ne tourne pas si un boss est actif
             if (alienGrid.aliens.length === 0 || boss) return;
 
             let hitEdge = false;
@@ -911,33 +1074,33 @@
                 
                 let moveY = 0;
                 if (alienGrid.moveDown) {
-                    moveY = -1.0; // Descend d'une rangée
+                    moveY = -1.0; 
                 }
                 alien.mesh.position.x += alienGrid.direction * alienGrid.speed * dt;
                 alien.mesh.position.y += moveY;
                 
-                // Mise à jour de la spatialisation audio (Section 8.2)
                 if (alien.audioNode && audioContext) {
                     alien.audioNode.positionX.setValueAtTime(alien.mesh.position.x, audioContext.currentTime);
-                    alien.audioNode.positionY.setValueAtTime(alien.mesh.position.y, audioContext.currentTime);
-                    alien.audioNode.positionZ.setValueAtTime(alien.mesh.position.z, audioContext.currentTime);
                 }
                 
                 if (alien.mesh.position.x > halfWidth || alien.mesh.position.x < -halfWidth) {
                     hitEdge = true;
                 }
                 
-                // Logique de tir (Section 5.2)
                 if (Math.random() < alienGrid.fireRate * dt) {
                      const bullet = bulletPool.get();
                      bullet.isPlayerBullet = false;
                      bullet.mesh.material = alienBulletMaterial;
                      bullet.mesh.position.copy(alien.mesh.position).y -= 0.5;
-                     bullet.velocity.set(0, -5, 0); // Vitesse des tirs aliens
-                     // Pas de son pour les tirs aliens pour l'instant
+                     bullet.velocity.set(0, -5, 0);
+                     
+                     // CORRECTION: Assigner la lumière ICI
+                     bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
+                     bullet.light.intensity = 5; // AUGMENTÉ
+                     bullet.light.visible = true;
+                     bullet.mesh.add(bullet.light);
                 }
                 
-                // Vérifie défaite
                 if (alien.mesh.position.y < player.mesh.position.y) {
                     setGameState(GAME_STATE.GAME_OVER);
                 }
@@ -948,36 +1111,33 @@
             }
             
             if (hitEdge) {
-                alienGrid.direction *= -1; // Change de direction
+                alienGrid.direction *= -1; 
                 alienGrid.moveDown = true;
-                alienGrid.speed *= 1.05; // Accélère (Section 5.2)
+                alienGrid.speed *= 1.05;
             }
         }
         
-        // AJOUT: IA du Boss (CDC 6.3 / 6.1)
+        // IA du Boss (CDC 6.3 / 6.1)
         function updateBoss(dt) {
             if (!boss || !boss.active) return;
             
             const state = boss.fsm.state;
             boss.fsm.timer -= dt;
             
-            // FSM (Machine à états)
             switch(state) {
                 case 'ENTERING':
-                    // Phase 1: Le boss descend à sa position de combat
                     boss.mesh.position.y = THREE.MathUtils.lerp(boss.mesh.position.y, boss.fsm.targetY, 0.05);
                     if (boss.fsm.timer <= 0) {
                         boss.fsm.state = 'ATTACKING';
-                        boss.fsm.timer = 5.0; // 5 secondes d'attaque
+                        boss.fsm.timer = 5.0; 
                     }
                     break;
                     
                 case 'ATTACKING':
-                    // Phase 2: Le boss tire rapidement
-                    boss.mesh.material.color.set(0xff0000); // Rouge vif (attaque)
+                    // Le matériau émissif devient plus intense
+                    boss.baseMaterial.emissive.set(0x880000); // Rouge vif
                     boss.fireCooldown -= dt;
                     if (boss.fireCooldown <= 0) {
-                        // Tir en éventail
                         const positions = [-2, 0, 2];
                         for (const xOffset of positions) {
                             const bullet = bulletPool.get();
@@ -985,47 +1145,52 @@
                             bullet.mesh.material = alienBulletMaterial;
                             bullet.mesh.position.copy(boss.mesh.position).y -= 1.0;
                             bullet.mesh.position.x += xOffset;
-                            bullet.velocity.set(0, -8, 0); // Tirs plus rapides
+                            bullet.velocity.set(0, -8, 0); 
+                            
+                            // CORRECTION: Assigner la lumière ICI
+                            bullet.light = alienLightPool.pop() || new THREE.PointLight(0xff0000, 5, 4); // AUGMENTÉ: Intensité 1->5, Distance 3->4
+                            bullet.light.intensity = 5; // AUGMENTÉ
+                            bullet.light.visible = true;
+                            bullet.mesh.add(bullet.light);
                         }
-                        boss.fireCooldown = 0.3; // Cadence de tir du boss
+                        boss.fireCooldown = 0.3; 
                     }
                     
                     if (boss.fsm.timer <= 0) {
                         boss.fsm.state = 'VULNERABLE';
-                        boss.fsm.timer = 3.0; // 3 secondes de pause
+                        boss.fsm.timer = 3.0; 
                     }
                     break;
                     
                 case 'VULNERABLE':
-                    // Phase 3: Le boss fait une pause (c'est le moment de tirer !)
-                    boss.mesh.material = boss.baseMaterial; // Couleur normale
+                    // Le matériau émissif s'éteint
+                    boss.baseMaterial.emissive.set(0x330000); // Rouge sombre
                     
                     if (boss.fsm.timer <= 0) {
                         boss.fsm.state = 'ATTACKING';
-                        boss.fsm.timer = 5.0; // Retour à l'attaque
+                        boss.fsm.timer = 5.0; 
                     }
                     break;
             }
             
-            // Mouvement latéral simple
             boss.mesh.position.x = Math.sin(clock.getElapsedTime() * 0.5) * (gameSize.width / 2 - 3);
         }
 
-        // Ajout : Logique UFO (CDC 5.3)
+        // Logique UFO (CDC 5.3)
         function updateUFO(dt) {
             ufoSpawnTimer -= dt;
             if (ufoSpawnTimer <= 0 && !ufo) {
                 createUFO();
-                ufoSpawnTimer = 15.0 + Math.random() * 10; // Prochain UFO dans 15-25s
+                ufoSpawnTimer = 15.0 + Math.random() * 10; 
             }
             
             if (ufo && ufo.active) {
                 ufo.mesh.position.x += ufo.velocity.x * dt;
                 ufo.mesh.rotation.y += dt * 2;
                 
-                // Détruire si sort de l'écran
                 if (ufo.mesh.position.x > gameSize.width / 2 + 2) {
                     scene.remove(ufo.mesh);
+                    ufo.active = false; // AJOUT: Doit être désactivé
                     ufo = null;
                 }
             }
@@ -1033,25 +1198,21 @@
         
         // --- 5.3 MovementSystem / TimerSystem (CDC Section 3.3) ---
         function updateMovementAndLifetime(dt) {
-            // Concerne les projectiles, les particules et les power-ups
             const activeBullets = bulletPool.getActiveObjects();
             const activeParticles = particlePool.getActiveObjects();
             const activePowerUps = powerUpPool.getActiveObjects();
             
-            for (const entity of [...activeBullets, ...activeParticles, ...activePowerUps]) {
-                // MovementSystem
+            const entitiesToUpdate = [...activeBullets, ...activeParticles, ...activePowerUps];
+            
+            for (const entity of entitiesToUpdate) {
                 entity.mesh.position.x += entity.velocity.x * dt;
                 entity.mesh.position.y += entity.velocity.y * dt;
                 entity.mesh.position.z += entity.velocity.z * dt;
 
-                // Mise à jour de la spatialisation audio (Section 8.2)
                 if (entity.audioNode && audioContext) {
                     entity.audioNode.positionX.setValueAtTime(entity.mesh.position.x, audioContext.currentTime);
-                    entity.audioNode.positionY.setValueAtTime(entity.mesh.position.y, audioContext.currentTime);
-                    entity.audioNode.positionZ.setValueAtTime(entity.mesh.position.z, audioContext.currentTime);
                 }
 
-                // TimerSystem (LifetimeComponent)
                 entity.lifetime -= dt;
                 if (entity.lifetime <= 0) {
                     if (entity.type === 'bullet') bulletPool.release(entity);
@@ -1059,21 +1220,25 @@
                     if (entity.type === 'powerup') powerUpPool.release(entity);
                 }
                 
-                // Particle-specific (Render logic)
                 if (entity.type === 'particle') {
                     entity.mesh.material.opacity = entity.lifetime * 2; // Fade out
+                }
+                
+                // AJOUT: Rotation des power-ups
+                if (entity.type === 'powerup') {
+                    entity.mesh.rotation.x += dt;
+                    entity.mesh.rotation.y += dt;
                 }
             }
         }
 
         // --- 5.4 CollisionSystem (CDC Section 4.2) ---
-        // Utilise BoundingBox (Box3) au lieu de Quadtree pour ce prototype 3D
         function updateCollisions() {
             const activeBullets = bulletPool.getActiveObjects();
             const activePowerUps = powerUpPool.getActiveObjects();
             
-            // Met à jour les BoundingBox
-            // Note: le joueur est mis à jour séparément
+            if (!player || !player.active) return; // Ne pas vérifier les collisions si le joueur est mort
+            
             player.collider.setFromObject(player.mesh);
             
             for (const entity of [...alienGrid.aliens, ...activeBullets, ...shields, ...activePowerUps]) {
@@ -1083,7 +1248,6 @@
             if (ufo && ufo.active) {
                 ufo.collider.setFromObject(ufo.mesh);
             }
-            // AJOUT: Collider du Boss
             if (boss && boss.active) {
                 boss.collider.setFromObject(boss.mesh);
             }
@@ -1097,19 +1261,15 @@
                     if (!alien.active) continue;
                     
                     if (bullet.collider.intersectsBox(alien.collider)) {
-                        // Collision ! (DamageSystem / DeathSystem)
                         bulletPool.release(bullet);
                         alien.health--;
                         
-                        // Feedback d'impact (Section 7.2) - Flash
                         alien.mesh.material.color.set(0xffffff);
-                        // MODIFIÉ : Réinitialise au bon matériau
                         setTimeout(() => {
                             if (alien.mesh) alien.mesh.material = alien.baseMaterial;
                         }, 50);
 
                         if (alien.health <= 0) {
-                            // DeathSystem
                             alien.active = false;
                             scene.remove(alien.mesh);
                             audioEngine.playSound('explosion', alien.audioNode);
@@ -1118,7 +1278,6 @@
                             score += 100;
                             updateHUD();
                             
-                            // Ajout : Chance de lâcher un power-up (CDC 6.4)
                             if (Math.random() < alienGrid.dropChance) {
                                 spawnPowerUp(alien.mesh.position);
                             }
@@ -1132,8 +1291,7 @@
                     if (bullet.collider.intersectsBox(shield.collider)) {
                         bulletPool.release(bullet);
                         shield.health--;
-                        // Feedback visuel : devient plus transparent
-                        shield.mesh.material.opacity = shield.health / 10 * 0.8; 
+                        shield.mesh.material.opacity = (shield.health / 10) * 0.6; 
                         if (shield.health <= 0) {
                             shield.active = false;
                             scene.remove(shield.mesh);
@@ -1150,62 +1308,56 @@
                         ufo.active = false;
                         scene.remove(ufo.mesh);
                         ufo = null;
-                        // CORRECTION: Logique de score/effet du UFO (était manquante/corrompue)
-                        score += 500; // Bonus
+                        score += 500; 
                         updateHUD();
                         triggerScreenshake(0.2, 0.3);
                         createExplosion(bullet.mesh.position, 50, 0xff4444);
-                    } // <--- CORRECTION: accolade fermante manquante
+                    }
                 }
                 
-                // AJOUT: ... vs Boss (CDC 6.3)
+                // ... vs Boss (CDC 6.3)
                 if (boss && boss.active && bullet.collider.intersectsBox(boss.collider)) {
                     bulletPool.release(bullet);
                     boss.health--;
-                    updateHUD(); // Met à jour la barre de vie
+                    updateHUD(); 
                     
-                    // Feedback (Section 7.2)
-                    boss.mesh.material.color.set(0xffffff);
+                    boss.baseMaterial.color.set(0xffffff);
                     setTimeout(() => {
                         if (boss.mesh) {
-                            // Revient à la couleur de l'état actuel
-                            if(boss.fsm.state === 'ATTACKING') {
-                                boss.mesh.material.color.set(0xff0000);
-                            } else {
-                                boss.mesh.material = boss.baseMaterial;
-                            }
+                            boss.baseMaterial.color.set(0x880000); // Revient à la couleur de base
                         }
                     }, 50);
                     
                     if (boss.health <= 0) {
-                        // Mort du Boss
                         boss.active = false;
                         scene.remove(boss.mesh);
                         boss = null;
                         
-                        score += 1000; // Gros bonus
+                        score += 1000; 
                         triggerScreenshake(0.5, 1.0);
                         createExplosion(bullet.mesh.position, 200, 0xff8800);
                         bossHealthBar.style.display = 'none';
                         
-                        // Passe au niveau suivant
                         advanceLevel();
                     }
                 }
             }
             
             // 2. Tirs Aliens vs ...
-            if (!player.active) return;
             for (const bullet of activeBullets) {
                 if (bullet.isPlayerBullet || !bullet.active) continue;
                 
-                // AJOUT: ... vs Bouclier Personnel (CDC 6.4)
+                // CORRECTION: Ajout d'une vérification pour s'assurer que le joueur
+                // n'est pas mort pendant cette même boucle
+                if (!player.active) break; 
+
+                // ... vs Bouclier Personnel (CDC 6.4)
                 if (player.shield.active && bullet.collider.intersectsBox(player.collider)) {
                     bulletPool.release(bullet);
-                    player.shield.active = false; // Le bouclier casse
+                    player.shield.active = false; 
                     triggerScreenshake(0.1, 0.2);
                     createExplosion(player.mesh.position, 20, 0x00ffff);
-                    continue; // Le tir est absorbé
+                    continue; 
                 }
 
                 // ... vs Joueur
@@ -1218,10 +1370,10 @@
                     audioEngine.playSound('hit', player.audioNode);
                     
                     if (lives <= 0) {
-                        // GAME OVER
                         player.active = false;
                         scene.remove(player.mesh);
                         setGameState(GAME_STATE.GAME_OVER);
+                        break; // CORRECTION: Sortir de la boucle, le joueur est mort
                     }
                 }
                 
@@ -1231,7 +1383,7 @@
                     if (bullet.collider.intersectsBox(shield.collider)) {
                         bulletPool.release(bullet);
                         shield.health--;
-                        shield.mesh.material.opacity = shield.health / 10 * 0.8;
+                        shield.mesh.material.opacity = (shield.health / 10) * 0.6;
                         if (shield.health <= 0) {
                             shield.active = false;
                             scene.remove(shield.mesh);
@@ -1241,7 +1393,6 @@
                 }
             }
             
-            // CORRECTION: Logique de collision "Joueur vs Power-Ups" (était manquante)
             // 3. Joueur vs Power-Ups (CDC 6.4)
             if (player.active) {
                 for (const powerUp of activePowerUps) {
@@ -1252,106 +1403,106 @@
                 }
             }
             
-            // CORRECTION: Logique de nettoyage et de passage au niveau suivant (était manquante)
-            // Nettoie la liste des aliens
             alienGrid.aliens = alienGrid.aliens.filter(a => a.active);
-            // MODIFIÉ: Ne passe au niveau suivant que s'il n'y a ni aliens NI boss
             if (alienGrid.aliens.length === 0 && !boss && currentGameState === GAME_STATE.PLAYING) {
-                // S'il n'y a plus d'aliens, passe au niveau suivant
                 advanceLevel();
             }
         }
         
-        // AJOUT: Système de gestion de niveaux
+        // Système de gestion de niveaux
         function advanceLevel() {
             currentLevel++;
             
-            // Logique de "Looping" (CDC Nv. 15+)
             if (currentLevel > 15) {
-                currentLevel = 1; // Reprend au niveau 1
-                // Note: Le score n'est PAS réinitialisé.
+                currentLevel = 1; 
             }
 
-            // Logique de Boss (CDC Boss)
-            // C'est ici que nous ajouterons le boss
             if (currentLevel % 3 === 0) {
-                // *** MODIFIÉ: On lance le BOSS ***
-                console.log(`NIVEAU ${currentLevel}: BOSS ENTRANT !`);
                 createBoss(); 
             } else {
-                console.log(`NIVEAU ${currentLevel}: Vague d'aliens`);
                 createAlienGrid();
             }
 
-            updateHUD(); // Met à jour l'affichage du niveau
+            updateHUD(); 
         }
         
-        // Ajout : Logique Power-Up (CDC 6.4)
+        // Logique Power-Up (CDC 6.4)
         function spawnPowerUp(position) {
             const p = powerUpPool.get();
             p.mesh.position.copy(position);
-            // La randomisation du type est maintenant dans resetPowerUp()
         }
         
         function activatePowerUp(type) {
             player.powerUpState = type;
-            player.powerUpTimer = 5.0; // Dure 5 secondes
+            player.powerUpTimer = 5.0; 
             
             if (type === 'rapid_fire') {
-                player.fireRate = player.baseFireRate / 2; // Tire 2x plus vite
+                player.fireRate = player.baseFireRate / 2; 
             } else if (type === 'spread_shot') {
-                player.fireRate = player.baseFireRate; // Garde la cadence normale
+                player.fireRate = player.baseFireRate; 
             } else if (type === 'shield') {
-                // AJOUT: Activation du bouclier (CDC 6.4)
                 player.shield.active = true;
             }
         }
         
         // --- 5.5 RenderSystem (CDC Section 3.3 / 7.1) ---
         function updateRender(dt) {
-            // Gestion du Screenshake (Section 7.1)
-            if (shake.duration > 0) {
-                shake.duration -= dt;
-                const s = shake.intensity;
-                camera.position.x = Math.random() * s - s / 2;
-                camera.position.z = 10 + Math.random() * s - s / 2;
-                camera.rotation.z = Math.random() * (s/5) - (s/10);
-            } else {
-                camera.position.x = 0;
-                camera.position.z = 10;
-                camera.rotation.z = 0;
-            }
             
-            // AJOUT (CDC 10.1) : Animation subtile du vaisseau joueur
+            // Animation subtile du vaisseau joueur
             if (player && player.active) {
-                // Rotation de lacet (Y) en fonction du mouvement horizontal
-                player.targetRotationY = -input.currentMoveX * 0.1; // Petite inclinaison latérale
+                player.targetRotationY = -input.currentMoveX * 0.1; 
                 player.currentRotationY = THREE.MathUtils.lerp(player.currentRotationY, player.targetRotationY, 0.1);
                 player.mesh.rotation.y = player.currentRotationY;
 
-                // Rotation de tangage (X) subtile
-                player.targetRotationX = Math.sin(clock.getElapsedTime() * 2) * 0.05; // Oscillation douce
+                player.targetRotationX = Math.sin(clock.getElapsedTime() * 2) * 0.05; 
                 player.currentRotationX = THREE.MathUtils.lerp(player.currentRotationX, player.targetRotationX, 0.05);
-                player.mesh.rotation.x = player.currentRotationX + Math.PI / 2; // +PI/2 pour orienter vers le haut
+                // Note: La rotation X de base pour l'orientation du modèle est gérée dans createPlayer
             }
 
-            // AJOUT (CDC 4.3) : Mouvement du Starfield
+            // Mouvement du Starfield (Parallaxe)
             if (starfield) {
-                starfield.position.y += dt * 0.2; // Défilement lent
-                if (starfield.position.y > 50) {
-                    starfield.position.y = -50;
-                }
+                starfield.position.y += dt * 0.2; 
+                if (starfield.position.y > 50) starfield.position.y = -50;
+            }
+            if (starfield2) {
+                starfield2.position.y += dt * 0.1; // Plus lent
+                if (starfield2.position.y > 50) starfield2.position.y = -50;
+            }
+            if (nebula) {
+                nebula.position.y += dt * 0.05; // Très lent
+                if (nebula.position.y > 50) nebula.position.y = -50;
             }
             
-            // Rotation des aliens (pour le "look" 3D)
+            // Rotation des aliens 
             for (const alien of alienGrid.aliens) {
                 if (alien.active && alien.mesh) {
                     alien.mesh.rotation.x += dt;
                     alien.mesh.rotation.y += dt;
                 }
             }
+            
+            // Gestion du Screenshake (Section 7.1)
+            // Appliqué au compositeur (caméra de passe) pour de meilleurs résultats
+            const passCamera = composer.passes[0].camera; // C'est la caméra de RenderPass
+            
+            if (shake.duration > 0) {
+                shake.duration -= dt;
+                const s = shake.intensity;
+                passCamera.position.x = Math.random() * s - s / 2;
+                passCamera.position.z = 10 + Math.random() * s - s / 2;
+                passCamera.rotation.z = Math.random() * (s/5) - (s/10);
+            } else {
+                passCamera.position.x = 0;
+                passCamera.position.z = 10;
+                passCamera.rotation.z = 0;
+            }
+            
+            // AJOUT: Mise à jour du FilmPass (pour l'animation)
+            filmPass.uniforms.time.value += dt;
 
-            renderer.render(scene, camera);
+            // MODIFIÉ: Rendu via le compositeur
+            // renderer.render(scene, camera);
+            composer.render(dt);
         }
 
         // =====================================================================
@@ -1360,70 +1511,83 @@
 
         // --- 6.1 Initialisation (Setup) ---
         async function init() {
-            // 1. UI (Montre le chargement)
             document.getElementById('loading-screen').style.display = 'flex';
-            // AJOUT: Récupère les éléments de la barre de vie du boss
             bossHealthBar = document.getElementById('boss-health-bar');
             bossHealthElement = document.getElementById('boss-health');
             
-            // MODIFIÉ: Le high score est chargé dans setGameState
-            
-            // 2. Moteur Audio (Section 8)
             await audioEngine.init();
             
-            // 3. Moteur de Rendu (Three.js)
             scene = new THREE.Scene();
-            
-            // AJOUT: Couleur de fond (espace)
-            scene.background = new THREE.Color(0x050510); 
+            // Fond bleu nuit très sombre
+            scene.background = new THREE.Color(0x000010); 
             
             camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-            camera.position.z = 10; // Recule la caméra
+            camera.position.z = 10; 
             
-            renderer = new THREE.WebGLRenderer({ canvas: document.getElementById('game-canvas'), antialias: true });
+            renderer = new THREE.WebGLRenderer({ 
+                canvas: document.getElementById('game-canvas') 
+                // antialias: false, // L'antialiasing est mieux géré par le post-traitement (FXAA/SMAA)
+            });
             renderer.setSize(window.innerWidth, window.innerHeight);
-            // AJOUT: Active les ombres (pour les MeshStandardMaterial)
-            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.enabled = true; // Ombres (désactivées car coûteuses)
             renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.setPixelRatio(window.devicePixelRatio); // Meilleure qualité
+            renderer.toneMapping = THREE.ACESFilmicToneMapping; // AJOUT: Essentiel pour le bloom !
             
             clock = new THREE.Clock();
 
-            // Lumières
-            const ambientLight = new THREE.AmbientLight(0x404040, 2);
+            // --- Lumières (Améliorées) ---
+            const ambientLight = new THREE.AmbientLight(0x404080, 2); // Ambiance bleutée
             scene.add(ambientLight);
             
-            // AJOUT: Directional Light avec ombres
+            // Lumière principale (soleil lointain)
             const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
             directionalLight.position.set(5, 10, 7.5);
-            directionalLight.castShadow = true; // La lumière projette des ombres
-            directionalLight.shadow.mapSize.width = 1024;
-            directionalLight.shadow.mapSize.height = 1024;
-            directionalLight.shadow.camera.near = 0.5;
-            directionalLight.shadow.camera.far = 50;
-            // Ajuste la zone d'ombre pour notre scène
-            directionalLight.shadow.camera.left = -10;
-            directionalLight.shadow.camera.right = 10;
-            directionalLight.shadow.camera.top = 10;
-            directionalLight.shadow.camera.bottom = -10;
+            // directionalLight.castShadow = true; // Ombres désactivées pour la performance
             scene.add(directionalLight);
             
-            // 4. Pré-chargement (Section 9.4)
-            // Simule la création de sons. Dans un vrai jeu, ce seraient des .mp3/.wav
-            // Pour éviter des requêtes externes, je génère des sons simples.
-            // ... (Omis pour la simplicité, on charge juste des placeholders)
-            // Note: Le chargement réel des sons est asynchrone.
-            // On prétend charger les sons ici.
+            // Lumière d'ambiance globale
+            const hemiLight = new THREE.HemisphereLight(0x00bfff, 0x002244, 1); // Ciel cyan, sol bleu foncé
+            scene.add(hemiLight);
+            
+            
+            // --- Post-Traitement (Bloom) ---
+            composer = new EffectComposer(renderer);
+            const renderPass = new RenderPass(scene, camera);
+            composer.addPass(renderPass);
+            
+            // Effet Bloom !
+            bloomPass = new UnrealBloomPass(
+                new THREE.Vector2(window.innerWidth, window.innerHeight),
+                1.0, // strength
+                0.4, // radius
+                0.9  // threshold (CORRIGÉ: 0.1 était trop bas, 0.9 ne cible que les objets très lumineux)
+            );
+            composer.addPass(bloomPass);
+            
+            // Effet Film (Vignette, Scanlines)
+            filmPass = new FilmPass(
+                0.35, // noise intensity
+                0.2,  // scanline intensity
+                648,  // scanline count
+                false // grayscale
+            );
+            composer.addPass(filmPass);
+
+
             document.getElementById('loading-text').innerText = 'CHARGEMENT TERMINÉ.';
             
-            // AJOUT (CDC 4.3) : Crée l'arrière-plan
-            createStarfield();
+            // Arrière-plan (Parallaxe)
+            starfield = createStarfield(5000, 0.1, -50);
+            starfield2 = createStarfield(2000, 0.05, -30);
+            createNebula();
             
-            // 5. Initialisation des Pools (Section 4.1)
+            // Pools
             bulletPool = new ObjectPool(createBulletEntity, resetBullet, 100);
             particlePool = new ObjectPool(createParticleEntity, resetParticle, 200);
-            powerUpPool = new ObjectPool(createPowerUpEntity, resetPowerUp, 20); // Pool pour les power-ups
+            powerUpPool = new ObjectPool(createPowerUpEntity, resetPowerUp, 20); 
 
-            // 6. Gestionnaires d'événements
+            // Gestionnaires d'événements
             window.addEventListener('resize', onWindowResize);
             document.addEventListener('keydown', onKeyDown);
             document.addEventListener('keyup', onKeyUp);
@@ -1432,18 +1596,16 @@
                 setGameState(GAME_STATE.PLAYING);
             });
             document.getElementById('restart-button').addEventListener('click', () => {
-                resetGame();
-                setGameState(GAME_STATE.PLAYING);
+                setGameState(GAME_STATE.MAIN_MENU); // Retour au menu pour recharger
             });
-            // AJOUT: Bouton Reprendre (CDC 9.2)
             document.getElementById('resume-button').addEventListener('click', () => {
                 setGameState(GAME_STATE.PLAYING);
             });
 
-            // 7. Démarrer la FSM
+            // Démarrer la FSM
             setGameState(GAME_STATE.MAIN_MENU);
             
-            // 8. Démarrer la boucle de jeu (Section 2.2)
+            // Démarrer la boucle de jeu 
             renderer.setAnimationLoop(gameLoop);
         }
 
@@ -1451,70 +1613,62 @@
         function setGameState(newState) {
             if (currentGameState === newState) return;
 
-            // AJOUT: Logique de bascule pour la Pause (CDC 9.2)
-            // Gère la pause sans cacher le HUD
+            // Logique de bascule pour la Pause
             if (newState === GAME_STATE.PLAYING && currentGameState === GAME_STATE.PAUSED) {
-                // On reprend le jeu
                 document.getElementById('pause-menu').style.display = 'none';
                 currentGameState = newState;
-                return; // On sort pour ne pas cacher le HUD
+                return; 
             }
             if (newState === GAME_STATE.PAUSED && currentGameState === GAME_STATE.PLAYING) {
-                // On met en pause
                 document.getElementById('pause-menu').style.display = 'flex';
                 currentGameState = newState;
-                return; // On sort pour garder le HUD visible
+                return; 
             }
 
             currentGameState = newState;
 
-            // Cache tous les écrans (pour les transitions complètes)
             document.getElementById('main-menu').style.display = 'none';
             document.getElementById('game-over-screen').style.display = 'none';
             document.getElementById('loading-screen').style.display = 'none';
             document.getElementById('hud').style.display = 'none';
-            document.getElementById('pause-menu').style.display = 'none'; // AJOUT
+            document.getElementById('pause-menu').style.display = 'none'; 
 
-            // Active l'état demandé
             switch (newState) {
                 case GAME_STATE.PRELOADING:
                     document.getElementById('loading-screen').style.display = 'flex';
                     break;
                 case GAME_STATE.MAIN_MENU:
                     document.getElementById('main-menu').style.display = 'flex';
-                    // MODIFIÉ: Charger le panneau des scores (CDC 9.6)
                     loadLeaderboard();
+                    resetGame(); // Réinitialise le jeu à chaque retour au menu
                     break;
                 case GAME_STATE.PLAYING:
-                    // Démarrage du jeu
                     if (audioContext && audioContext.state === 'suspended') {
                         audioContext.resume();
                     }
-                    resetGame(); // Réinitialise si c'est un nouveau jeu
+                    // Le jeu est déjà réinitialisé depuis MAIN_MENU
                     document.getElementById('hud').style.display = 'flex';
                     break;
                 case GAME_STATE.GAME_OVER:
                     document.getElementById('final-score').innerText = `SCORE : ${score}`;
                     document.getElementById('game-over-screen').style.display = 'flex';
-                    // MODIFIÉ: Sauvegarder au panneau des scores (CDC 9.6)
                     saveScoreToLeaderboard();
-                    bossHealthBar.style.display = 'none'; // Cache la barre de vie
+                    bossHealthBar.style.display = 'none'; 
                     break;
             }
         }
         
-        // AJOUT: Panneau des scores (CDC 9.6)
+        // Panneau des scores (CDC 9.6)
         function loadLeaderboard() {
             const scores = JSON.parse(localStorage.getItem('eliteInvaders_leaderboard')) || [];
             const list = document.getElementById('high-score-list');
-            list.innerHTML = ''; // Vide la liste
+            list.innerHTML = ''; 
             
             if (scores.length === 0) {
                 list.innerHTML = '<li>AUCUN SCORE</li>';
                 return;
             }
             
-            // Prend les 5 meilleurs (ou moins)
             const topScores = scores.slice(0, 5); 
             
             for (const s of topScores) {
@@ -1524,13 +1678,13 @@
             }
         }
 
-        // AJOUT: Panneau des scores (CDC 9.6)
+        // Panneau des scores (CDC 9.6)
         function saveScoreToLeaderboard() {
             const scores = JSON.parse(localStorage.getItem('eliteInvaders_leaderboard')) || [];
             scores.push(score);
-            scores.sort((a, b) => b - a); // Tri descendant
+            scores.sort((a, b) => b - a); 
             
-            const topScores = scores.slice(0, 5); // Garde le top 5
+            const topScores = scores.slice(0, 5);
             
             localStorage.setItem('eliteInvaders_leaderboard', JSON.stringify(topScores));
         }
@@ -1543,21 +1697,18 @@
             });
             entities = [];
             alienGrid.aliens = [];
-            shields = []; // Vide le tableau des boucliers
+            shields = []; 
             
-            // Réinitialise les pools
             bulletPool.getActiveObjects().forEach(b => bulletPool.release(b));
             particlePool.getActiveObjects().forEach(p => particlePool.release(p));
             powerUpPool.getActiveObjects().forEach(p => powerUpPool.release(p));
             
-            // Réinitialise l'UFO
             if (ufo) {
                 scene.remove(ufo.mesh);
                 ufo = null;
             }
             ufoSpawnTimer = 15.0;
             
-            // AJOUT: Réinitialise le Boss
             if (boss) {
                 scene.remove(boss.mesh);
                 boss = null;
@@ -1569,17 +1720,11 @@
             createAlienGrid();
             createShields();
             
-            // AJOUT : Nettoie et recrée le starfield
-            if (starfield) {
-                scene.remove(starfield);
-            }
-            createStarfield();
-            
             // Réinitialise les stats
             score = 0;
-            lives = 3;
-            currentLevel = 1; // AJOUT: Réinitialise le niveau
-            alienGrid.speed = alienGrid.baseSpeed; // MODIFIÉ
+            lives = 55; // MODIFIÉ: 3 -> 55
+            currentLevel = 1; 
+            alienGrid.speed = alienGrid.baseSpeed; 
             alienGrid.direction = 1;
             updateHUD();
         }
@@ -1588,22 +1733,18 @@
         function gameLoop() {
             deltaTime = clock.getDelta();
 
-            // La FSM (Section 9.2) contrôle ce qui est mis à jour
             if (currentGameState === GAME_STATE.PLAYING) {
-                // Logique de jeu (ECS Systems)
                 updatePlayer(deltaTime);
-                // MODIFIÉ: updateAliens et updateBoss s'excluent mutuellement
                 if (boss) {
                     updateBoss(deltaTime);
                 } else {
                     updateAliens(deltaTime);
                 }
-                updateUFO(deltaTime); // Ajout du système UFO
+                updateUFO(deltaTime); 
                 updateMovementAndLifetime(deltaTime);
                 updateCollisions();
             }
             
-            // Le rendu et les effets tournent toujours (sauf en PRELOADING)
             if (currentGameState !== GAME_STATE.PRELOADING) {
                 updateRender(deltaTime);
             }
@@ -1614,6 +1755,8 @@
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
+            // AJOUT: Mettre à jour le compositeur
+            composer.setSize(window.innerWidth, window.innerHeight);
         }
 
         function onKeyDown(event) {
@@ -1622,17 +1765,15 @@
                 case 'KeyA':
                     input.left = true;
                     break;
-                // --- CORRECTION APPLIQUÉE ICI ---
                 case 'ArrowRight':
-                case 'KeyD': // Ajout de la touche D
-                    input.right = true; // Ajout de la logique pour aller à droite
-                    break; // Ajout du break manquant
-                case 'Space': // Ajout pour cohérence
-                case 'ArrowUp': // Ajout pour cohérence
+                case 'KeyD': 
+                    input.right = true; 
+                    break; 
+                case 'Space': 
+                case 'ArrowUp': 
                 case 'KeyW':
                     input.fire = true;
                     break;
-                // AJOUT: Gestion de la Pause (CDC 9.2)
                 case 'Escape':
                     if (currentGameState === GAME_STATE.PLAYING) {
                         setGameState(GAME_STATE.PAUSED);
@@ -1665,9 +1806,8 @@
         function updateHUD() {
             document.getElementById('score').innerText = `SCORE : ${score}`;
             document.getElementById('lives').innerText = `VIES : ${lives}`;
-            document.getElementById('level').innerText = `NIVEAU : ${currentLevel}`; // AJOUT
+            document.getElementById('level').innerText = `NIVEAU : ${currentLevel}`; 
             
-            // AJOUT: Mise à jour de la barre de vie du boss (CDC 9.3)
             if (boss && boss.active) {
                 const healthPercent = (boss.health / boss.maxHealth) * 100;
                 bossHealthElement.style.width = `${healthPercent}%`;
@@ -1680,3 +1820,11 @@
     </script>
 </body>
 </html>
+
+
+
+
+
+
+
+
